@@ -1342,15 +1342,15 @@ let gameMode = null; // 'cam' or 'touch'
 
 function pDiff(d) {
   diff = d;
-  document.querySelectorAll('.d-c').forEach(c => c.classList.remove('sel'));
+  ['d-easy','d-medium','d-hard'].forEach(id => document.getElementById(id).classList.remove('sel'));
   document.getElementById('d-' + d).classList.add('sel');
   checkReady();
 }
 
 function pMode(m) {
   gameMode = m;
-  document.getElementById('m-cam').classList.toggle('sel', m === 'cam');
-  document.getElementById('m-touch').classList.toggle('sel', m === 'touch');
+  ['m-cam','m-touch'].forEach(id => document.getElementById(id).classList.remove('sel'));
+  document.getElementById('m-' + m).classList.add('sel');
   checkReady();
 }
 
