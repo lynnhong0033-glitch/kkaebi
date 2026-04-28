@@ -227,6 +227,55 @@
   .conf{position:fixed;border-radius:2px;z-index:110;animation:cf 3s ease-out forwards;}
   @keyframes cf{0%{transform:translateY(-10px) rotate(0) scale(1);opacity:1;}100%{transform:translateY(100vh) rotate(720deg) scale(.5);opacity:0;}}
 
+  /* 터치 모드: 내 손 */
+  .my-hands-touch{
+    position:absolute;bottom:50px;left:0;right:0;z-index:12;
+    display:flex;justify-content:center;gap:1.5rem;
+    padding:0.5rem;
+  }
+  .my-hw{
+    display:flex;flex-direction:column;align-items:center;cursor:pointer;
+    transition:transform 0.2s;
+  }
+  .my-hw:hover{transform:scale(1.05);}
+  .my-hw:active{transform:scale(0.95);}
+  .my-hand-svg{width:130px;height:180px;transform:rotate(180deg);filter:hue-rotate(180deg) saturate(0.6) brightness(1.3);}
+  .my-fc{font-family:'Outfit';font-weight:900;font-size:1.4rem;color:var(--me);margin-top:-0.2rem;text-shadow:0 2px 6px #000;}
+  .my-hw.dead-hand{opacity:0.2;pointer-events:none;}
+  .my-hw.selected-hand{transform:scale(1.1);filter:drop-shadow(0 0 12px var(--me));}
+
+  /* 터치 모드: 상대 손 선택 */
+  .touch-target{
+    position:absolute;inset:0;z-index:50;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:#000000dd;
+  }
+  .tt-text{font-family:'Black Han Sans';font-size:1.3rem;margin-bottom:1rem;color:var(--gold);}
+  .tt-btns{display:flex;gap:1rem;}
+  .tt-btn{
+    font-family:'Noto Sans KR';font-weight:900;font-size:1.1rem;
+    padding:1rem 2rem;border:none;border-radius:14px;
+    background:var(--card);color:#fff;border:2px solid var(--border);
+    cursor:pointer;transition:all 0.2s;
+  }
+  .tt-btn:hover{border-color:var(--me);transform:scale(1.05);}
+  .tt-cancel{font-size:0.75rem;color:var(--muted);background:none;border:none;cursor:pointer;margin-top:0.8rem;}
+
+  /* 터치 모드: 쪼개기 버튼 */
+  .touch-split-btn{
+    position:absolute;bottom:240px;left:50%;transform:translateX(-50%);z-index:12;
+    font-family:'Noto Sans KR';font-weight:700;font-size:0.85rem;
+    padding:0.5rem 1.2rem;border:none;border-radius:10px;
+    background:#fbbf2440;color:var(--gold);cursor:pointer;
+    backdrop-filter:blur(4px);
+  }
+  .touch-split-btn:disabled{opacity:0.2;cursor:default;}
+
+  /* 터치 모드 배경 */
+  .touch-bg{
+    position:absolute;inset:0;z-index:0;
+    background:linear-gradient(180deg, #0a0a1a 0%, #141428 50%, #1a1a30 100%);
+  }
   /* 도움말 패널 */
   .help-panel{
     position:fixed;inset:0;z-index:60;
@@ -287,7 +336,12 @@
     <div class="d-c" onclick="pDiff('medium')" id="d-medium"><div class="d-ce">🤔</div><div class="d-cn">중수</div><div class="d-cd">좀 생각함</div></div>
     <div class="d-c" onclick="pDiff('hard')" id="d-hard"><div class="d-ce">😈</div><div class="d-cn">고수</div><div class="d-cd">자비 없음</div></div>
   </div>
-  <button class="d-go" id="dGoBtn" onclick="launch()" disabled>난이도를 골라주세요</button>
+  <p class="d-s" style="margin-top:1rem;margin-bottom:0.8rem;">조작 방식</p>
+  <div class="d-cs">
+    <div class="d-c" onclick="pMode('cam')" id="m-cam"><div class="d-ce">📷</div><div class="d-cn">카메라</div><div class="d-cd">손으로 직접 조작</div></div>
+    <div class="d-c" onclick="pMode('touch')" id="m-touch"><div class="d-ce">👆</div><div class="d-cn">터치/클릭</div><div class="d-cd">화면 터치로 조작</div></div>
+  </div>
+  <button class="d-go" id="dGoBtn" onclick="launch()" disabled>난이도와 모드를 골라주세요</button>
 </div>
 
 <!-- 게임 -->
@@ -318,6 +372,28 @@
   <!-- 내 손 정보 -->
   <div class="my-info my-info-l"><div class="my-num" id="myLC">1</div><div class="my-lbl">왼손</div></div>
   <div class="my-info my-info-r"><div class="my-num" id="myRC">1</div><div class="my-lbl">오른손</div></div>
+
+  <!-- 터치 모드: 내 손 SVG (하단) -->
+  <div class="my-hands-touch" id="myHandsTouch" style="display:none;">
+    <div class="my-hw" id="myLBox" onclick="touchAtk('l')">
+      <svg class="my-hand-svg" id="svgML" viewBox="0 0 110 160"></svg>
+      <div class="my-fc" id="myLCt">1</div>
+    </div>
+    <div class="my-hw" id="myRBox" onclick="touchAtk('r')">
+      <svg class="my-hand-svg" id="svgMR" viewBox="0 0 110 160"></svg>
+      <div class="my-fc" id="myRCt">1</div>
+    </div>
+  </div>
+
+  <!-- 터치 모드: 상대 손 선택 오버레이 -->
+  <div class="touch-target" id="touchTarget" style="display:none;">
+    <div class="tt-text">어느 손을 공격할까요?</div>
+    <div class="tt-btns">
+      <button class="tt-btn" onclick="touchTargetSel('l')">👈 왼손</button>
+      <button class="tt-btn" onclick="touchTargetSel('r')">👉 오른손</button>
+    </div>
+    <button class="tt-cancel" onclick="touchTargetCancel()">취소</button>
+  </div>
 
   <div class="st-bar" id="stBar">손을 들어주세요 ✋</div>
 
@@ -562,7 +638,7 @@ function onHR(res) {
         gestReady = true;
         prevLeftInZone = leftHandY < ATTACK_ZONE;
         prevRightInZone = rightHandY < ATTACK_ZONE;
-        setSt('손을 올려서 공격하세요 👆');
+        setSt(gameMode==='touch'?'내 손을 터치해서 공격하세요 👆':'손을 올려서 공격하세요 👆');
       }, 3000);
     }
   }
@@ -792,6 +868,10 @@ function canSplit() {
 
 function startSplit() {
   if (!canSplit()) return;
+  if (gameMode === 'touch') {
+    openSplit();
+    return;
+  }
   splitMode = true;
   const total = G.me.l + G.me.r;
   document.getElementById('sgTotal').textContent = total;
@@ -799,13 +879,84 @@ function startSplit() {
   setSt('손가락을 원하는 수만큼 펴세요');
 }
 
+function openSplit() {
+  if (!canSplit()) return;
+  const total = G.me.l + G.me.r;
+  // splitGuide를 슬라이더 모드로 전환
+  splitMode = true;
+  const sg = document.getElementById('splitGuide');
+  sg.classList.add('show');
+  document.getElementById('sgTotal').textContent = total;
+
+  // 터치 모드면 슬라이더 보여주기
+  if (gameMode === 'touch') {
+    // sgL, sgR을 버튼으로 조작 가능하게
+    document.getElementById('sgL').textContent = G.me.l;
+    document.getElementById('sgR').textContent = G.me.r;
+    document.getElementById('sgValid').textContent = '';
+    document.getElementById('sgOk').disabled = true;
+    document.getElementById('sgOk').style.opacity = '0.3';
+
+    // ← → 버튼 추가 (없으면)
+    if (!document.getElementById('sgLeftBtn')) {
+      const controls = document.createElement('div');
+      controls.id = 'sgControls';
+      controls.style.cssText = 'display:flex;gap:0.8rem;margin-top:0.8rem;';
+      controls.innerHTML = `
+        <button id="sgLeftBtn" style="font-size:1.5rem;padding:0.4rem 1rem;border:none;border-radius:8px;background:#ff6b3530;color:var(--me);cursor:pointer;" onclick="splitAdjust(-1)">◀ 왼손+</button>
+        <button id="sgRightBtn" style="font-size:1.5rem;padding:0.4rem 1rem;border:none;border-radius:8px;background:#fbbf2430;color:var(--gold);cursor:pointer;" onclick="splitAdjust(1)">오른손+ ▶</button>
+      `;
+      sg.querySelector('.sg-hands').after(controls);
+    }
+    splitTouchL = G.me.l;
+    splitTouchR = G.me.r;
+  }
+  setSt('쪼개기: 원하는 분배를 선택하세요');
+}
+
+let splitTouchL = 0, splitTouchR = 0;
+
+function splitAdjust(dir) {
+  const total = G.me.l + G.me.r;
+  if (dir === -1) { // 왼손 +1
+    splitTouchL = Math.min(splitTouchL + 1, Math.min(total, 4));
+    splitTouchR = total - splitTouchL;
+  } else { // 오른손 +1
+    splitTouchR = Math.min(splitTouchR + 1, Math.min(total, 4));
+    splitTouchL = total - splitTouchR;
+  }
+  if (splitTouchL < 0) splitTouchL = 0;
+  if (splitTouchR < 0) splitTouchR = 0;
+
+  document.getElementById('sgL').textContent = splitTouchL;
+  document.getElementById('sgR').textContent = splitTouchR;
+
+  const valid = (splitTouchL + splitTouchR === total) &&
+    !(splitTouchL === G.me.l && splitTouchR === G.me.r) &&
+    splitTouchL <= 4 && splitTouchR <= 4 &&
+    splitTouchL >= 0 && splitTouchR >= 0;
+  document.getElementById('sgValid').textContent = valid ? '✅ OK!' : '현재와 다르게 나눠주세요';
+  document.getElementById('sgOk').disabled = !valid;
+  document.getElementById('sgOk').style.opacity = valid ? '1' : '0.3';
+}
+
 function confirmSplit() {
   const total = G.me.l + G.me.r;
-  const nL = curL, nR = curR;
+  let nL, nR;
+
+  if (gameMode === 'touch') {
+    nL = splitTouchL;
+    nR = splitTouchR;
+  } else {
+    nL = curL;
+    nR = curR;
+  }
+
   if (nL + nR !== total || (nL === G.me.l && nR === G.me.r) || nL > 4 || nR > 4) return;
   G.me.l = nL; G.me.r = nR;
   splitMode = false;
   document.getElementById('splitGuide').classList.remove('show');
+  showPlayMsg('쪼개기!', `${nL} / ${nR}`, '', true);
   turns++;
   G.phase = 'cpu-turn'; render();
   setSt('컴퓨터 생각 중...');
@@ -815,7 +966,7 @@ function confirmSplit() {
 function cancelSplit() {
   splitMode = false;
   document.getElementById('splitGuide').classList.remove('show');
-  setSt('손가락을 까딱하세요 ✋');
+  setSt(gameMode==='touch'?'내 손을 터치해서 공격하세요 👆':'손을 올려서 공격하세요 👆');
 }
 
 // ═══ CPU ═══
@@ -825,7 +976,7 @@ function cpuTurn() {
   ['l', 'r'].forEach(a => { if (G.cpu[a] === 0) return; ['l', 'r'].forEach(d => { if (G.me[d] === 0) return; moves.push({ type: 'atk', a, d, raw: G.cpu[a] + G.me[d], res: applyHit(G.cpu[a] + G.me[d]) }); }); });
   const splits = cpuSp();
   const all = [...moves, ...splits];
-  if (!all.length) { G.phase = 'my-turn'; render(); setSt('손을 올려서 공격하세요 👆'); return; }
+  if (!all.length) { G.phase = 'my-turn'; render(); setSt(gameMode==='touch'?'내 손을 터치해서 공격하세요 👆':'손을 올려서 공격하세요 👆'); return; }
 
   let ch;
   if (diff === 'easy') ch = all[Math.floor(Math.random() * all.length)];
@@ -837,7 +988,7 @@ function cpuTurn() {
     G.cpu.l = ch.nl; G.cpu.r = ch.nr; turns++; render();
     showPlayMsg('컴퓨터가 쪼갰습니다!', `${oldL},${oldR} → ${ch.nl},${ch.nr}`, '');
     setSt('컴퓨터가 쪼갰습니다 ✌️');
-    setTimeout(() => { G.phase = 'my-turn'; render(); setSt('손을 올려서 공격하세요 👆'); }, 1200);
+    setTimeout(() => { G.phase = 'my-turn'; render(); setSt(gameMode==='touch'?'내 손을 터치해서 공격하세요 👆':'손을 올려서 공격하세요 👆'); }, 1200);
   } else {
     const cpuHandName = ch.a === 'l' ? '왼손' : '오른손';
     const myHandName = ch.d === 'l' ? '왼손' : '오른손';
@@ -845,19 +996,26 @@ function cpuTurn() {
     const myOld = G.me[ch.d];
     setSt(`⚠️ 컴퓨터 ${cpuHandName}(${cpuVal})이 내 ${myHandName}(${myOld})을 노린다!`);
 
-    // CPU 손 내려오는 모션 SVG
-    const atkX = ch.d === 'l' ? '15%' : '55%';
-    showCpuAtkMotion(atkX, cpuVal);
+    // 상단의 실제 CPU 손 SVG 자체를 내려보내는 애니메이션
+    const cpuHandEl = document.getElementById(ch.a === 'l' ? 'cpuLWrap' : 'cpuRWrap');
+    cpuHandEl.style.transition = 'transform 0.5s ease-in';
+    cpuHandEl.style.transform = 'translateY(250px) scale(1.15)';
+    cpuHandEl.style.zIndex = '36';
 
-    // 모션이 내려와서 치는 시점 (0.6초 뒤)
+    // 모션이 내려와서 치는 시점
     setTimeout(() => {
+      // 💥 이펙트
+      const hitX = ch.d === 'l' ? '25%' : '75%';
+      const hitY = gameMode === 'touch' ? '60%' : '65%';
+      showFx(hitX, hitY, '💥', 'clash-fx');
+
+      // 바운스
+      cpuHandEl.style.transition = 'transform 0.15s ease-out';
+      cpuHandEl.style.transform = 'translateY(230px) scale(1.1)';
+
       const raw = cpuVal + myOld;
       G.me[ch.d] = applyHit(raw);
       const newVal = G.me[ch.d];
-
-      // 💥 이펙트
-      const x = ch.d === 'l' ? '25%' : '75%';
-      showFx(x, '65%', '💥', 'clash-fx');
 
       // 실황 메시지
       let line2 = `${myOld} + ${cpuVal} = ${raw}`;
@@ -867,6 +1025,13 @@ function cpuTurn() {
 
       turns++; render();
 
+      // 손 되돌리기
+      setTimeout(() => {
+        cpuHandEl.style.transition = 'transform 0.4s ease-out';
+        cpuHandEl.style.transform = 'translateY(0) scale(1)';
+        cpuHandEl.style.zIndex = '';
+      }, 400);
+
       // 손가락 안내
       setTimeout(() => {
         if (!G.over && G.me.l > 0) showFingerGuide('12%', '70%', `왼손 ${G.me.l}개 펴세요`, 'var(--me)');
@@ -875,9 +1040,9 @@ function cpuTurn() {
 
       if (G.me.l === 0 && G.me.r === 0) { G.over = true; render(); setTimeout(() => showRes('lose'), 1200); return; }
       setTimeout(() => {
-        G.phase = 'my-turn'; render(); setSt('손을 올려서 공격하세요 👆');
+        G.phase = 'my-turn'; render(); setSt(gameMode==='touch'?'내 손을 터치해서 공격하세요 👆':'손을 올려서 공격하세요 👆');
       }, 2000);
-    }, 800);
+    }, 500);
   }
 }
 
@@ -900,7 +1065,8 @@ function render() {
   document.getElementById('myRC').style.opacity = G.me.r === 0 ? 0.2 : 1;
   document.getElementById('sMe').textContent = scores.me;
   document.getElementById('sCpu').textContent = scores.cpu;
-  document.getElementById('targetZone').classList.toggle('active', G.phase === 'my-turn' && !G.over);
+  document.getElementById('targetZone').classList.toggle('active', G.phase === 'my-turn' && !G.over && gameMode === 'cam');
+  renderTouch();
 }
 function setSt(t) { document.getElementById('stBar').innerHTML = t; }
 
@@ -920,7 +1086,13 @@ function resetRound() {
   prevLeftInZone = false; prevRightInZone = false;
   document.getElementById('handGuide').classList.remove('hidden');
   document.getElementById('splitGuide').classList.remove('show');
-  render(); setSt('손을 들어주세요 ✋');
+  render();
+  if (gameMode === 'touch') {
+    document.getElementById('handGuide').classList.add('hidden');
+    setSt('내 손을 터치해서 공격하세요 👆');
+  } else {
+    setSt('손을 들어주세요 ✋');
+  }
 }
 function rematch() { document.getElementById('resOv').classList.remove('show'); resetRound(); }
 function goMenu() { document.getElementById('gameScreen').style.display = 'none'; document.getElementById('resOv').classList.remove('show'); document.getElementById('diffScreen').classList.add('show'); }
@@ -936,8 +1108,187 @@ document.addEventListener('keydown', e => {
 // ═══ 초기화 ═══
 function skipTut() { document.getElementById('tutorial').classList.add('hidden'); document.getElementById('diffScreen').classList.add('show'); }
 function toggleHelp() { document.getElementById('helpPanel').classList.toggle('show'); }
-function pDiff(d) { diff = d; document.querySelectorAll('.d-c').forEach(c => c.classList.remove('sel')); document.getElementById('d-' + d).classList.add('sel'); const b = document.getElementById('dGoBtn'); b.disabled = false; b.textContent = { easy: '하수로 시작!', medium: '중수로 시작!', hard: '고수로 시작!' }[d]; }
-function launch() { document.getElementById('diffScreen').classList.remove('show'); initCam(); }
+
+let gameMode = null; // 'cam' or 'touch'
+
+function pDiff(d) {
+  diff = d;
+  document.querySelectorAll('.d-c').forEach(c => c.classList.remove('sel'));
+  document.getElementById('d-' + d).classList.add('sel');
+  checkReady();
+}
+
+function pMode(m) {
+  gameMode = m;
+  document.getElementById('m-cam').classList.toggle('sel', m === 'cam');
+  document.getElementById('m-touch').classList.toggle('sel', m === 'touch');
+  checkReady();
+}
+
+function checkReady() {
+  const b = document.getElementById('dGoBtn');
+  if (diff && gameMode) {
+    b.disabled = false;
+    const dn = { easy: '하수', medium: '중수', hard: '고수' };
+    const mn = { cam: '📷 카메라', touch: '👆 터치' };
+    b.textContent = `${dn[diff]} + ${mn[gameMode]}으로 시작!`;
+  }
+}
+
+function launch() {
+  document.getElementById('diffScreen').classList.remove('show');
+  document.getElementById('gDf').textContent = { easy: '😴 하수', medium: '🤔 중수', hard: '😈 고수' }[diff];
+
+  if (gameMode === 'cam') {
+    initCam();
+  } else {
+    initTouchMode();
+  }
+}
+
+// ═══ 터치 모드 ═══
+function initTouchMode() {
+  htOn = false;
+  // 카메라 숨기고 배경 표시
+  document.getElementById('camFull').style.display = 'none';
+  document.getElementById('overlay').style.display = 'none';
+
+  // 배경 추가
+  const bg = document.createElement('div');
+  bg.className = 'touch-bg';
+  bg.id = 'touchBg';
+  document.getElementById('gameScreen').insertBefore(bg, document.getElementById('gameScreen').firstChild);
+
+  // 내 손 SVG 표시
+  document.getElementById('myHandsTouch').style.display = 'flex';
+
+  // 쪼개기 버튼
+  const spBtn = document.createElement('button');
+  spBtn.className = 'touch-split-btn';
+  spBtn.id = 'touchSpBtn';
+  spBtn.textContent = '👏 양손 부딪혀 쪼개기';
+  spBtn.onclick = () => {
+    if (canSplit()) {
+      openSplit();
+    }
+  };
+  document.getElementById('gameScreen').appendChild(spBtn);
+
+  // 안내 숨기기
+  document.getElementById('handGuide').classList.add('hidden');
+
+  document.getElementById('gameScreen').style.display = 'block';
+  resetRound();
+  setSt('내 손을 터치해서 공격하세요 👆');
+}
+
+// 내 손 SVG 그리기 (파란색 톤으로 구분)
+function drawMyHandSvg(svg, count, dead) {
+  const skin = '#64B5F6';
+  const skinDark = '#42A5F5';
+  const skinLight = '#90CAF9';
+  const nail = '#BBDEFB';
+  const shadow = '#1E88E5';
+  const outline = '#1976D2';
+
+  if (dead) {
+    svg.innerHTML = `
+      <ellipse cx="55" cy="45" rx="40" ry="38" fill="#333" stroke="#444" stroke-width="2"/>
+      <text x="55" y="48" text-anchor="middle" fill="#ef4444" font-size="40">💀</text>`;
+    return;
+  }
+
+  let h = '';
+  h += `<rect x="30" y="0" width="50" height="24" rx="12" fill="${skin}" stroke="${outline}" stroke-width="1.5"/>`;
+  h += `<rect x="14" y="14" width="82" height="74" rx="24" fill="${skin}" stroke="${outline}" stroke-width="2"/>`;
+  h += `<ellipse cx="55" cy="40" rx="30" ry="20" fill="${skinLight}" opacity="0.3"/>`;
+  h += `<ellipse cx="12" cy="44" rx="14" ry="22" fill="${skin}" stroke="${outline}" stroke-width="1.5" transform="rotate(10, 12, 44)"/>`;
+  h += `<ellipse cx="8" cy="62" rx="8" ry="6" fill="${nail}" stroke="${skinDark}" stroke-width="0.5"/>`;
+
+  const fingers = [
+    { cx: 30, w: 18, maxH: 62 },
+    { cx: 50, w: 19, maxH: 72 },
+    { cx: 70, w: 18, maxH: 62 },
+    { cx: 88, w: 16, maxH: 50 },
+  ];
+
+  const patterns = { 0: [], 1: [0], 2: [0,1], 3: [0,1,2], 4: [0,1,2,3] };
+  const active = patterns[Math.min(count, 4)] || [];
+
+  fingers.forEach((f, i) => {
+    const isDown = active.includes(i);
+    const startY = 80;
+    const r = f.w / 2;
+    if (isDown) {
+      const len = f.maxH;
+      h += `<rect x="${f.cx - r + 2}" y="${startY + 3}" width="${f.w}" height="${len}" rx="${r}" fill="${shadow}" opacity="0.2"/>`;
+      h += `<rect x="${f.cx - r}" y="${startY}" width="${f.w}" height="${len}" rx="${r}" fill="${skin}" stroke="${outline}" stroke-width="1.5"/>`;
+      h += `<rect x="${f.cx - r + 3}" y="${startY + 8}" width="5" height="${len - 28}" rx="2.5" fill="${skinLight}" opacity="0.45"/>`;
+      h += `<line x1="${f.cx - r + 4}" y1="${startY + 18}" x2="${f.cx + r - 4}" y2="${startY + 18}" stroke="${skinDark}" stroke-width="1.2" opacity="0.35" stroke-linecap="round"/>`;
+      h += `<line x1="${f.cx - r + 4}" y1="${startY + 35}" x2="${f.cx + r - 4}" y2="${startY + 35}" stroke="${skinDark}" stroke-width="1.2" opacity="0.35" stroke-linecap="round"/>`;
+      h += `<rect x="${f.cx - r + 3}" y="${startY + len - 18}" width="${f.w - 6}" height="18" rx="${(f.w - 6) / 2}" fill="${nail}" stroke="${skinDark}" stroke-width="0.5"/>`;
+      h += `<rect x="${f.cx - r + 5}" y="${startY + len - 15}" width="${f.w - 10}" height="6" rx="3" fill="#fff" opacity="0.5"/>`;
+    } else {
+      h += `<ellipse cx="${f.cx}" cy="${startY + 8}" rx="${r - 1}" ry="9" fill="${skinDark}" stroke="${shadow}" stroke-width="0.8" opacity="0.5"/>`;
+    }
+  });
+  svg.innerHTML = h;
+}
+
+let touchAtkHand = null;
+
+function touchAtk(hand) {
+  if (G.over || G.phase !== 'my-turn') return;
+  if (G.me[hand] === 0) return;
+
+  touchAtkHand = hand;
+
+  // 선택한 손 표시
+  document.getElementById('myLBox').classList.toggle('selected-hand', hand === 'l');
+  document.getElementById('myRBox').classList.toggle('selected-hand', hand === 'r');
+
+  // 상대 살아있는 손 확인
+  const alive = [];
+  if (G.cpu.l > 0) alive.push('l');
+  if (G.cpu.r > 0) alive.push('r');
+
+  if (alive.length === 1) {
+    execAtk(hand, alive[0]);
+    document.getElementById('myLBox').classList.remove('selected-hand');
+    document.getElementById('myRBox').classList.remove('selected-hand');
+  } else {
+    document.getElementById('touchTarget').style.display = 'flex';
+  }
+}
+
+function touchTargetSel(cpuHand) {
+  document.getElementById('touchTarget').style.display = 'none';
+  document.getElementById('myLBox').classList.remove('selected-hand');
+  document.getElementById('myRBox').classList.remove('selected-hand');
+  execAtk(touchAtkHand, cpuHand);
+}
+
+function touchTargetCancel() {
+  document.getElementById('touchTarget').style.display = 'none';
+  document.getElementById('myLBox').classList.remove('selected-hand');
+  document.getElementById('myRBox').classList.remove('selected-hand');
+  touchAtkHand = null;
+}
+
+// 터치 모드 렌더 추가
+function renderTouch() {
+  if (gameMode !== 'touch') return;
+
+  drawMyHandSvg(document.getElementById('svgML'), G.me.l, G.me.l === 0);
+  drawMyHandSvg(document.getElementById('svgMR'), G.me.r, G.me.r === 0);
+  document.getElementById('myLCt').textContent = G.me.l;
+  document.getElementById('myRCt').textContent = G.me.r;
+  document.getElementById('myLBox').classList.toggle('dead-hand', G.me.l === 0);
+  document.getElementById('myRBox').classList.toggle('dead-hand', G.me.r === 0);
+
+  const spBtn = document.getElementById('touchSpBtn');
+  if (spBtn) spBtn.disabled = !canSplit();
+}
 </script>
 </body>
 </html>
