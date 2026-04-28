@@ -244,7 +244,23 @@
   .my-hw.dead-hand{opacity:0.2;pointer-events:none;}
   .my-hw.selected-hand{transform:scale(1.1);filter:drop-shadow(0 0 12px var(--me));}
 
-  /* 드래그 가능한 내 손 */
+  /* 양손 사이 쪼개기 버튼 */
+  .split-mid-btn{
+    display:flex;align-items:center;justify-content:center;
+    width:50px;height:50px;flex-shrink:0;
+    font-size:1.8rem;cursor:pointer;
+    border-radius:50%;
+    background:#fbbf2430;
+    border:2px solid #fbbf2466;
+    transition:all 0.2s;
+    animation:splitBounce 1.5s ease-in-out infinite;
+  }
+  .split-mid-btn:hover{transform:scale(1.1);background:#fbbf2450;}
+  .split-mid-btn:active{transform:scale(0.95);}
+  @keyframes splitBounce{
+    0%,100%{transform:scale(1);}
+    50%{transform:scale(1.08);}
+  }
   .my-hw.dragging{z-index:20;transition:none !important;opacity:0.9;}
   .my-hw.drag-ready{cursor:grab;}
   .my-hw.drag-ready:active{cursor:grabbing;}
@@ -431,6 +447,9 @@
     <div class="my-hw" id="myLBox">
       <svg class="my-hand-svg" id="svgML" viewBox="0 0 110 160"></svg>
       <div class="my-fc" id="myLCt">1</div>
+    </div>
+    <div class="split-mid-btn" id="splitMidBtn" onclick="if(canSplit())openSplit()" style="display:none;">
+      👏
     </div>
     <div class="my-hw" id="myRBox">
       <svg class="my-hand-svg" id="svgMR" viewBox="0 0 110 160"></svg>
@@ -1355,7 +1374,7 @@ function getShareText() {
 }
 
 function shareKakao() {
-  const url = `https://story.kakao.com/share?url=${encodeURIComponent(getShareUrl())}`;
+  const url = `https://sharer.kakao.com/talk/friends/picker/link?url=${encodeURIComponent(getShareUrl())}&text=${encodeURIComponent(getShareText())}`;
   window.open(url, '_blank');
 }
 function shareTwitter() {
@@ -1659,6 +1678,12 @@ function renderTouch() {
   document.getElementById('myRCt').textContent = G.me.r;
   document.getElementById('myLBox').classList.toggle('dead-hand', G.me.l === 0);
   document.getElementById('myRBox').classList.toggle('dead-hand', G.me.r === 0);
+
+  // 쪼개기 버튼: 내 차례 + 쪼개기 가능할 때만 보임
+  const splitBtn = document.getElementById('splitMidBtn');
+  if (splitBtn) {
+    splitBtn.style.display = (G.phase === 'my-turn' && !G.over && canSplit()) ? 'flex' : 'none';
+  }
 }
 </script>
 </body>
