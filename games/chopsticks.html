@@ -1448,7 +1448,19 @@ function launch() {
 // ═══ 터치 모드 ═══
 function initTouchMode() {
   htOn = false;
-  document.getElementById('camFull').style.display = 'none';
+
+  // 카메라 스트림 완전히 끄기
+  const camEl = document.getElementById('camFull');
+  if (camEl.srcObject) {
+    camEl.srcObject.getTracks().forEach(t => t.stop());
+    camEl.srcObject = null;
+  }
+  const htVid = document.getElementById('htV');
+  if (htVid.srcObject) {
+    htVid.srcObject.getTracks().forEach(t => t.stop());
+    htVid.srcObject = null;
+  }
+  camEl.style.display = 'none';
   document.getElementById('overlay').style.display = 'none';
 
   // 배경 (중복 방지)
