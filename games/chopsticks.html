@@ -63,15 +63,21 @@
   .cpu-hand-svg{width:90px;height:130px;}
   .cpu-fc{font-family:'Outfit';font-weight:900;font-size:1.3rem;color:var(--cpu);margin-top:-0.2rem;}
 
-  /* 타겟 영역 표시 (공격시 손이 여기 도달해야 함) */
+  /* 타겟 영역 표시 (공격시 손가락이 여기 넘으면 공격) */
   .target-zone{
-    position:absolute;top:0;left:0;right:0;height:25%;z-index:5;
+    position:absolute;top:0;left:0;right:0;height:35%;z-index:5;
     pointer-events:none;
     border-bottom:2px dashed transparent;
-    transition:border-color 0.3s;
+    transition:all 0.3s;
   }
   .target-zone.active{
-    border-bottom-color:#ffffff22;
+    border-bottom:2px dashed #ffffff44;
+  }
+  .target-zone.active::after{
+    content:'↑ 손가락을 여기 넘기면 공격!';
+    position:absolute;bottom:6px;left:50%;transform:translateX(-50%);
+    font-size:0.65rem;color:#ffffff55;white-space:nowrap;
+    font-weight:700;
   }
 
   /* 내 손 정보 */
@@ -242,9 +248,8 @@
     <div class="rg">
       <div class="rc"><div class="rn">1</div><div class="rv"><span class="rvn" style="color:var(--me)">☝️1</span>&nbsp;<span class="rvn" style="color:var(--me)">☝️1</span></div><div class="rt"><div class="rt-t">양손 1개씩 시작</div><div class="rt-d">검지를 하나씩 펴고 시작</div></div></div>
       <div class="rc"><div class="rn">2</div><div class="rv"><span class="rvn" style="color:var(--me)">2</span><span class="rvs">+</span><span class="rvn" style="color:var(--cpu)">1</span><span class="rvs">=</span><span class="rvn" style="color:var(--cpu)">3</span></div><div class="rt"><div class="rt-t">터치 = 숫자 합산</div><div class="rt-d">내 손가락 수가 상대에 더해짐</div></div></div>
-      <div class="rc"><div class="rn">3</div><div class="rv"><span class="rvn" style="color:var(--me)">2</span><span class="rvs">+</span><span class="rvn" style="color:var(--cpu)">3</span><span class="rvs">=</span><span class="rvn" style="color:var(--red)">5💀</span></div><div class="rt"><div class="rt-t">딱 5 = 사망!</div><div class="rt-d">정확히 5면 그 손은 죽음</div></div></div>
-      <div class="rc"><div class="rn">4</div><div class="rv"><span class="rvn" style="color:var(--me)">4</span><span class="rvs">+</span><span class="rvn" style="color:var(--cpu)">3</span><span class="rvs">=</span><span class="rvn" style="color:var(--gold)">7→2</span></div><div class="rt"><div class="rt-t">5 초과 → 5를 빼!</div><div class="rt-d">7이면 5 빼서 2</div></div></div>
-      <div class="rc"><div class="rn">5</div><div class="rv"><span class="rvn" style="color:var(--red)">💀0</span>&nbsp;<span class="rvn" style="color:var(--me)">4</span><span class="rvs">→</span><span class="rvn" style="color:var(--gold)">1,3</span></div><div class="rt"><div class="rt-t">쪼개기 = 부활</div><div class="rt-d">합 유지하며 자유 분배</div></div></div>
+      <div class="rc"><div class="rn">3</div><div class="rv"><span class="rvn" style="color:var(--me)">2</span><span class="rvs">+</span><span class="rvn" style="color:var(--cpu)">3</span><span class="rvs">=</span><span class="rvn" style="color:var(--red)">5💀</span></div><div class="rt"><div class="rt-t">5 이상 = 사망!</div><div class="rt-d">5 이상이면 그 손은 죽음</div></div></div>
+      <div class="rc"><div class="rn">4</div><div class="rv"><span class="rvn" style="color:var(--red)">💀0</span>&nbsp;<span class="rvn" style="color:var(--me)">4</span><span class="rvs">→</span><span class="rvn" style="color:var(--gold)">1,3</span></div><div class="rt"><div class="rt-t">쪼개기 = 부활</div><div class="rt-d">합 유지하며 자유 분배</div></div></div>
     </div>
     <div class="ctrl-s">
       <div class="ctrl-t">📷 조작법</div>
@@ -326,8 +331,7 @@
         <div class="help-cards">
           <div class="help-card"><div class="help-icon">☝️</div><div class="help-text"><div class="help-text-t">양손 1개씩 시작</div><div class="help-text-d">검지를 하나씩 펴고 시작</div></div></div>
           <div class="help-card"><div class="help-icon">👆</div><div class="help-text"><div class="help-text-t">터치 = 숫자 합산</div><div class="help-text-d">내 손가락 수가 상대에 더해짐 (2+1=3)</div></div></div>
-          <div class="help-card"><div class="help-icon">💀</div><div class="help-text"><div class="help-text-t">딱 5 = 사망!</div><div class="help-text-d">정확히 5가 되면 그 손은 죽음</div></div></div>
-          <div class="help-card"><div class="help-icon">🔄</div><div class="help-text"><div class="help-text-t">5 초과 → 5를 빼!</div><div class="help-text-d">7이면 5를 빼서 2 (정확히 5만 죽음)</div></div></div>
+          <div class="help-card"><div class="help-icon">💀</div><div class="help-text"><div class="help-text-t">5 이상 = 사망!</div><div class="help-text-d">5 이상이 되면 그 손은 죽음</div></div></div>
           <div class="help-card"><div class="help-icon">✌️</div><div class="help-text"><div class="help-text-t">쪼개기 = 부활</div><div class="help-text-d">합 유지하며 자유 분배 (현 상태 유지 금지)</div></div></div>
         </div>
       </div>
@@ -411,13 +415,13 @@ let diff = null, scores = { me: 0, cpu: 0 }, turns = 0;
 let G = { me: { l: 1, r: 1 }, cpu: { l: 1, r: 1 }, phase: 'wait', over: false };
 let splitMode = false;
 
-function applyHit(v) { return v === 5 ? 0 : v > 5 ? v - 5 : v; }
+function applyHit(v) { return v >= 5 ? 0 : v; }
 
 // ═══ 핸드트래킹 ═══
 let htOn = false, gestReady = true;
 let curL = 0, curR = 0;
 let handDetected = false;
-const COOL = 1200;
+const COOL = 800;
 const TIPS = [8, 12, 16, 20];
 const cvs = document.getElementById('overlay');
 const ctx = cvs.getContext('2d');
@@ -426,7 +430,7 @@ const ctx = cvs.getContext('2d');
 let leftHandY = 1, rightHandY = 1; // 0=상단, 1=하단
 let leftHandX = 0.25, rightHandX = 0.75;
 let prevLeftInZone = false, prevRightInZone = false;
-const ATTACK_ZONE = 0.28; // 화면 상위 28%
+const ATTACK_ZONE = 0.38; // 화면 상위 38%
 let leftHandClose = false, rightHandClose = false; // 양손이 가까이 있는지
 
 function cntF(lm, h) {
@@ -465,7 +469,7 @@ async function initCam() {
 function onHR(res) {
   ctx.clearRect(0, 0, cvs.width, cvs.height);
   let nL = 0, nR = 0;
-  let lY = 1, rY = 1, lX = 0.25, rX = 0.75;
+  let lTipY = 1, rTipY = 1, lX = 0.25, rX = 0.75;
   let foundLeft = false, foundRight = false;
 
   if (res.multiHandLandmarks && res.multiHandedness) {
@@ -473,12 +477,15 @@ function onHR(res) {
       const lm = res.multiHandLandmarks[i];
       const lb = res.multiHandedness[i].label;
       const f = cntF(lm, lb);
-      const wrist = lm[0];
+
+      // 손가락 끝 중 가장 높은 점 (y가 가장 작은 값)
+      const tipY = Math.min(lm[4].y, lm[8].y, lm[12].y, lm[16].y, lm[20].y);
+      const tipX = lm[12].x; // 중지 기준 x
 
       if (lb === 'Right') { // 미러: Right=왼손
-        nL = f; lY = wrist.y; lX = 1 - wrist.x; foundLeft = true;
+        nL = f; lTipY = tipY; lX = 1 - tipX; foundLeft = true;
       } else {
-        nR = f; rY = wrist.y; rX = 1 - wrist.x; foundRight = true;
+        nR = f; rTipY = tipY; rX = 1 - tipX; foundRight = true;
       }
       drawHandGfx(lm, lb, f);
     }
@@ -490,7 +497,7 @@ function onHR(res) {
   }
 
   curL = nL; curR = nR;
-  leftHandY = lY; rightHandY = rY;
+  leftHandY = lTipY; rightHandY = rTipY;
   leftHandX = lX; rightHandX = rX;
 
   // 양손 거리 체크 (쪼개기용)
@@ -514,18 +521,18 @@ function onHR(res) {
     return;
   }
 
-  // 공격 감지: 손이 화면 상단 공격 영역에 진입
+  // 공격 감지: 손가락 끝이 공격 영역(상단 38%)에 진입
   if (G.phase === 'my-turn' && gestReady && handDetected) {
-    const lInZone = lY < ATTACK_ZONE && foundLeft;
-    const rInZone = rY < ATTACK_ZONE && foundRight;
+    const lInZone = lTipY < ATTACK_ZONE && foundLeft;
+    const rInZone = rTipY < ATTACK_ZONE && foundRight;
 
-    // 왼손이 공격 영역에 새로 진입
+    // 왼손 손가락이 공격 영역에 새로 진입
     if (lInZone && !prevLeftInZone && G.me.l > 0) {
       gestReady = false;
       doAttack('l', lX);
       setTimeout(() => { gestReady = true; }, COOL);
     }
-    // 오른손이 공격 영역에 새로 진입
+    // 오른손 손가락이 공격 영역에 새로 진입
     else if (rInZone && !prevRightInZone && G.me.r > 0) {
       gestReady = false;
       doAttack('r', rX);
@@ -583,9 +590,9 @@ function drawHandGfx(lm, label, fCount) {
   ctx.fillText(fCount, (1 - palm.x) * w, palm.y * h - 40);
   ctx.shadowBlur = 0;
 
-  // 손이 공격 영역에 있으면 강조
-  const wrist = lm[0];
-  if (wrist.y < ATTACK_ZONE && G.phase === 'my-turn') {
+  // 손가락 끝이 공격 영역에 있으면 강조
+  const tipMinY = Math.min(lm[4].y, lm[8].y, lm[12].y, lm[16].y, lm[20].y);
+  if (tipMinY < ATTACK_ZONE && G.phase === 'my-turn') {
     ctx.beginPath();
     ctx.arc((1 - palm.x) * w, palm.y * h, 55, 0, Math.PI * 2);
     ctx.strokeStyle = '#ff6b3588'; ctx.lineWidth = 3; ctx.stroke();
@@ -627,7 +634,6 @@ function execAtk(mh, ch) {
   let line2 = `${oldCpu} + ${v} = ${raw}`;
   let line3 = '';
   if (newCpu === 0) { line2 += ' → 💀 사망!'; line3 = '상대 손을 죽였습니다!'; }
-  else if (raw > 5) { line2 += ` → ${newCpu}`; line3 = '5를 빼서 살아남았습니다'; }
   showPlayMsg(`내 ${myHandName}(${v})으로 상대 ${cpuHandName}(${oldCpu})을 쳤다!`, line2, line3);
 
   // 이펙트
@@ -782,7 +788,6 @@ function cpuTurn() {
       let line2 = `${myOld} + ${cpuVal} = ${raw}`;
       let line3 = '';
       if (newVal === 0) { line2 += ' → 💀 사망!'; line3 = '내 손이 죽었습니다!'; }
-      else if (raw > 5) { line2 += ` → ${newVal}`; line3 = '5를 빼서 살아남았습니다'; }
       showPlayMsg(`컴퓨터 ${cpuHandName}(${cpuVal})이 내 ${myHandName}(${myOld})을 쳤다!`, line2, line3);
 
       const x = ch.d === 'l' ? '25%' : '75%';
