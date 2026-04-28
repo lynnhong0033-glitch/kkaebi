@@ -3,916 +3,1531 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KKAEBI — 무쓸모 뚝딱 프로그램 & AI 크리에이터</title>
-<meta name="description" content="KKAEBI의 무쓸모 뚝딱 프로그램, AI 콘텐츠 강의, 프롬프트 자료실">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&family=Noto+Sans+KR:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<title>🥢 젓가락 게임 - 무쓸모 뚝딱 프로그램</title>
 <style>
-  :root {
-    --bg-deep: #06060b;
-    --bg: #0b0b14;
-    --bg-card: #12121f;
-    --bg-card-hover: #1a1a2e;
-    --border: #ffffff08;
-    --border-hover: #ffffff18;
-    --text: #e4e4e8;
-    --text-dim: #6b6b80;
-    --text-muted: #44445a;
-    --accent: #ff6b35;
-    --accent-soft: #ff6b3522;
-    --mint: #2dd4a8;
-    --mint-soft: #2dd4a822;
-    --purple: #8b5cf6;
-    --purple-soft: #8b5cf622;
-    --pink: #f472b6;
-    --yellow: #fbbf24;
-    --radius: 16px;
-    --radius-sm: 10px;
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
-
-  body {
-    background: var(--bg-deep);
-    color: var(--text);
-    font-family: 'Noto Sans KR', 'Outfit', sans-serif;
-    line-height: 1.7;
-    overflow-x: hidden;
-  }
-
-  /* ── 그레인 텍스처 ── */
-  body::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 9999;
-  }
-
-  /* ── 네비게이션 ── */
-  nav {
-    position: fixed;
-    top: 0;
-    width: 100%;
-    z-index: 1000;
-    padding: 1rem 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    backdrop-filter: blur(20px);
-    background: #06060bcc;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .nav-logo {
-    font-family: 'Outfit', sans-serif;
-    font-weight: 900;
-    font-size: 1.4rem;
-    letter-spacing: -0.5px;
-    color: var(--accent);
-    text-decoration: none;
-  }
-
-  .nav-links {
-    display: flex;
-    gap: 0.3rem;
-    list-style: none;
-  }
-
-  .nav-links a {
-    color: var(--text-dim);
-    text-decoration: none;
-    font-size: 0.85rem;
-    font-weight: 600;
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    transition: all 0.2s;
-  }
-
-  .nav-links a:hover {
-    color: var(--text);
-    background: #ffffff08;
-  }
-
-  .nav-mobile-btn {
-    display: none;
-    background: none;
-    border: none;
-    color: var(--text);
-    font-size: 1.5rem;
-    cursor: pointer;
-  }
-
-  /* ── 히어로 ── */
-  .hero {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 6rem 2rem 4rem;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .hero::before {
-    content: '';
-    position: absolute;
-    top: -30%;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 800px;
-    height: 800px;
-    background: radial-gradient(circle, var(--accent-soft) 0%, transparent 70%);
-    pointer-events: none;
-  }
-
-  .hero-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.4rem 1rem;
-    background: var(--bg-card);
-    border: 1px solid var(--border-hover);
-    border-radius: 30px;
-    font-size: 0.8rem;
-    color: var(--text-dim);
-    margin-bottom: 2rem;
-    animation: fadeUp 0.8s ease-out;
-  }
-
-  .hero-badge .dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--mint);
-    animation: blink 2s infinite;
-  }
-
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-  }
-
-  .hero h1 {
-    font-family: 'Outfit', sans-serif;
-    font-weight: 900;
-    font-size: clamp(3rem, 10vw, 7rem);
-    letter-spacing: -3px;
-    line-height: 1;
-    margin-bottom: 1.5rem;
-    animation: fadeUp 0.8s ease-out 0.1s both;
-  }
-
-  .hero h1 .highlight {
-    background: linear-gradient(135deg, var(--accent), var(--yellow));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-
-  .hero-sub {
-    font-size: clamp(1rem, 2.5vw, 1.3rem);
-    color: var(--text-dim);
-    max-width: 500px;
-    margin-bottom: 3rem;
-    font-weight: 300;
-    animation: fadeUp 0.8s ease-out 0.2s both;
-  }
-
-  .hero-cta {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-    justify-content: center;
-    animation: fadeUp 0.8s ease-out 0.3s both;
-  }
-
-  .btn {
-    font-family: 'Noto Sans KR', sans-serif;
-    font-weight: 700;
-    font-size: 0.95rem;
-    padding: 0.8rem 2rem;
-    border-radius: 12px;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    transition: all 0.25s;
-    border: none;
-    cursor: pointer;
-  }
-
-  .btn-primary {
-    background: var(--accent);
-    color: white;
-    box-shadow: 0 4px 20px var(--accent-soft);
-  }
-
-  .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 30px #ff6b3544;
-  }
-
-  .btn-ghost {
-    background: var(--bg-card);
-    color: var(--text);
-    border: 1px solid var(--border-hover);
-  }
-
-  .btn-ghost:hover {
-    background: var(--bg-card-hover);
-    transform: translateY(-2px);
-  }
-
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(30px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  /* ── 스크롤 관찰 애니메이션 ── */
-  .reveal {
-    opacity: 0;
-    transform: translateY(40px);
-    transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  .reveal.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  /* ── 섹션 공통 ── */
-  section {
-    padding: 6rem 2rem;
-    max-width: 1100px;
-    margin: 0 auto;
-  }
-
-  .section-label {
-    font-family: 'Outfit', sans-serif;
-    font-size: 0.75rem;
-    font-weight: 800;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 0.8rem;
-  }
-
-  .section-title {
-    font-family: 'Outfit', sans-serif;
-    font-size: clamp(1.8rem, 4vw, 2.8rem);
-    font-weight: 900;
-    letter-spacing: -1px;
-    margin-bottom: 1rem;
-  }
-
-  .section-desc {
-    color: var(--text-dim);
-    max-width: 550px;
-    margin-bottom: 3rem;
-    font-size: 1rem;
-  }
-
-  /* ── 게임/프로그램 카드 그리드 ── */
-  .card-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1.2rem;
-  }
-
-  .game-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-    transition: all 0.3s;
-    position: relative;
-    text-decoration: none;
-    color: inherit;
-    display: block;
-  }
-
-  .game-card:hover {
-    border-color: var(--border-hover);
-    transform: translateY(-4px);
-    box-shadow: 0 20px 40px #00000040;
-  }
-
-  .card-thumb {
-    width: 100%;
-    height: 180px;
-    background: var(--bg-card-hover);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 4rem;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .card-thumb::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, transparent 50%, var(--bg-card) 100%);
-  }
-
-  .card-tag {
-    position: absolute;
-    top: 0.8rem;
-    right: 0.8rem;
-    padding: 0.2rem 0.7rem;
-    border-radius: 6px;
-    font-size: 0.7rem;
-    font-weight: 700;
-    z-index: 2;
-  }
-
-  .tag-game { background: var(--mint-soft); color: var(--mint); }
-  .tag-tool { background: var(--purple-soft); color: var(--purple); }
-  .tag-coming { background: #ffffff10; color: var(--text-dim); }
-
-  .card-body {
-    padding: 1.2rem 1.5rem 1.5rem;
-  }
-
-  .card-body h3 {
-    font-weight: 800;
-    font-size: 1.1rem;
-    margin-bottom: 0.4rem;
-  }
-
-  .card-body p {
-    font-size: 0.85rem;
-    color: var(--text-dim);
-    line-height: 1.6;
-  }
-
-  .card-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 1.5rem 1.2rem;
-  }
-
-  .card-play {
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: var(--accent);
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-  }
-
-  .card-yt {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-  }
-
-  /* ── 자료실 ── */
-  .resource-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1rem;
-  }
-
-  .resource-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 1.5rem;
-    transition: all 0.3s;
-    cursor: pointer;
-  }
-
-  .resource-card:hover {
-    border-color: var(--border-hover);
-    transform: translateY(-2px);
-  }
-
-  .resource-icon {
-    font-size: 2rem;
-    margin-bottom: 0.8rem;
-  }
-
-  .resource-card h4 {
-    font-weight: 700;
-    margin-bottom: 0.3rem;
-  }
-
-  .resource-card p {
-    font-size: 0.85rem;
-    color: var(--text-dim);
-  }
-
-  .resource-price {
-    display: inline-block;
-    margin-top: 0.8rem;
-    font-size: 0.75rem;
-    font-weight: 700;
-    padding: 0.2rem 0.6rem;
-    border-radius: 5px;
-  }
-
-  .price-free { background: var(--mint-soft); color: var(--mint); }
-  .price-paid { background: var(--accent-soft); color: var(--accent); }
-
-  /* ── 강의 ── */
-  .course-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .course-item {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1.5rem 2rem;
-    transition: all 0.3s;
-    text-decoration: none;
-    color: inherit;
-  }
-
-  .course-item:hover {
-    border-color: var(--border-hover);
-    transform: translateY(-2px);
-  }
-
-  .course-emoji {
-    font-size: 2.5rem;
-    flex-shrink: 0;
-  }
-
-  .course-info h4 {
-    font-weight: 800;
-    margin-bottom: 0.3rem;
-  }
-
-  .course-info p {
-    font-size: 0.85rem;
-    color: var(--text-dim);
-  }
-
-  .course-badge {
-    margin-left: auto;
-    padding: 0.3rem 0.8rem;
-    border-radius: 6px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    flex-shrink: 0;
-  }
-
-  .badge-free { background: var(--mint-soft); color: var(--mint); }
-  .badge-paid { background: var(--accent-soft); color: var(--accent); }
-  .badge-soon { background: #ffffff08; color: var(--text-muted); }
-
-  /* ── 커뮤니티 ── */
-  .community-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1rem;
-  }
-
-  .community-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 2rem;
-    text-align: center;
-    transition: all 0.3s;
-    text-decoration: none;
-    color: inherit;
-    display: block;
-  }
-
-  .community-card:hover {
-    border-color: var(--border-hover);
-    transform: translateY(-3px);
-  }
-
-  .community-card .icon {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
-  }
-
-  .community-card h4 {
-    font-weight: 700;
-    margin-bottom: 0.3rem;
-  }
-
-  .community-card p {
-    font-size: 0.85rem;
-    color: var(--text-dim);
-  }
-
-  /* ── About ── */
-  .about-layout {
-    display: flex;
-    gap: 3rem;
-    align-items: flex-start;
-  }
-
-  .about-avatar {
-    width: 160px;
-    height: 160px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--accent), var(--purple));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 4rem;
-    flex-shrink: 0;
-    overflow: hidden;
-    border: 3px solid var(--accent);
-    box-shadow: 0 0 30px #ff6b3522;
-  }
-
-  .about-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .about-text h3 {
-    font-family: 'Outfit', sans-serif;
-    font-weight: 900;
-    font-size: 1.8rem;
-    margin-bottom: 0.5rem;
-  }
-
-  .about-text .tagline {
-    color: var(--accent);
-    font-weight: 700;
-    font-size: 0.95rem;
-    margin-bottom: 1rem;
-  }
-
-  .about-text p {
-    color: var(--text-dim);
-    margin-bottom: 1.5rem;
-    font-size: 0.95rem;
-  }
-
-  .social-links {
-    display: flex;
-    gap: 0.8rem;
-  }
-
-  .social-link {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.5rem 1rem;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text-dim);
-    text-decoration: none;
-    font-size: 0.85rem;
-    font-weight: 600;
-    transition: all 0.2s;
-  }
-
-  .social-link:hover {
-    border-color: var(--border-hover);
-    color: var(--text);
-    transform: translateY(-1px);
-  }
-
-  /* ── 푸터 ── */
-  footer {
-    text-align: center;
-    padding: 3rem 2rem;
-    border-top: 1px solid var(--border);
-    color: var(--text-muted);
-    font-size: 0.8rem;
-  }
-
-  footer a {
-    color: var(--text-dim);
-    text-decoration: none;
-  }
-
-  /* ── 구분선 ── */
-  .divider {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 0 2rem;
-  }
-
-  .divider hr {
-    border: none;
-    border-top: 1px solid var(--border);
-  }
-
-  /* ── 반응형 ── */
-  @media (max-width: 768px) {
-    nav { padding: 0.8rem 1.2rem; }
-
-    .nav-links { display: none; }
-    .nav-links.open {
-      display: flex;
-      flex-direction: column;
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
-      background: var(--bg-deep);
-      border-bottom: 1px solid var(--border);
-      padding: 1rem;
-    }
-    .nav-mobile-btn { display: block; }
-
-    section { padding: 4rem 1.2rem; }
-
-    .card-grid,
-    .resource-grid,
-    .community-cards {
-      grid-template-columns: 1fr;
-    }
-
-    .about-layout {
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-    }
-
-    .social-links { justify-content: center; flex-wrap: wrap; }
-
-    .course-item {
-      flex-direction: column;
-      text-align: center;
-      gap: 1rem;
-    }
-
-    .course-badge { margin-left: 0; }
-
-    .hero h1 { letter-spacing: -1px; }
+  @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;700;900&family=Outfit:wght@400;700;900&display=swap');
+  :root{--me:#ff6b35;--cpu:#2dd4a8;--gold:#fbbf24;--red:#ef4444;--bg:#08080f;--card:#141422;--border:#ffffff14;--dim:#5a5a72;--muted:#3a3a4e;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:#000;color:#fff;font-family:'Noto Sans KR',sans-serif;height:100vh;overflow:hidden;user-select:none;}
+
+  /* ═══ 튜토리얼 ═══ */
+  #tutorial{position:fixed;inset:0;z-index:500;background:var(--bg);display:flex;flex-direction:column;align-items:center;overflow-y:auto;}
+  #tutorial.hidden{display:none;}
+  .tut-c{max-width:460px;width:92%;text-align:center;padding:1.5rem 0 2.5rem;}
+  .tut-t{font-family:'Black Han Sans';font-size:clamp(1.8rem,6vw,2.8rem);background:linear-gradient(135deg,var(--me),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:0.2rem;}
+  .tut-s{color:var(--dim);font-size:0.82rem;margin-bottom:1.2rem;}
+  .rg{display:flex;flex-direction:column;gap:0.6rem;margin-bottom:1.2rem;text-align:left;}
+  .rc{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:0.8rem 1rem;display:flex;align-items:center;gap:0.8rem;}
+  .rn{width:24px;height:24px;border-radius:50%;background:var(--me);color:#fff;font-family:'Outfit';font-weight:900;font-size:0.7rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .rv{display:flex;align-items:center;gap:0.3rem;flex-shrink:0;min-width:100px;justify-content:center;}
+  .rvn{font-family:'Outfit';font-weight:900;font-size:1rem;}
+  .rvs{font-family:'Outfit';font-weight:900;font-size:0.9rem;color:var(--gold);}
+  .rt{flex:1;min-width:0;}.rt-t{font-weight:900;font-size:0.8rem;margin-bottom:0.1rem;}.rt-d{font-size:0.7rem;color:var(--dim);line-height:1.4;}
+  .ctrl-s{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem;margin-bottom:1.2rem;}
+  .ctrl-t{font-weight:900;font-size:0.85rem;margin-bottom:0.6rem;color:var(--gold);text-align:center;}
+  .ctrl-rows{display:flex;flex-direction:column;gap:0.5rem;}
+  .ctrl-row{display:flex;align-items:center;gap:0.5rem;font-size:0.8rem;}
+  .ctrl-icon{font-size:1.3rem;width:35px;text-align:center;}
+  .ctrl-desc{flex:1;font-size:0.75rem;color:var(--dim);}
+  .tut-go{font-family:'Black Han Sans';font-size:1.1rem;padding:0.7rem 2.5rem;border:none;border-radius:50px;background:linear-gradient(135deg,var(--me),#ff8f5a);color:#fff;cursor:pointer;transition:0.2s;}
+  .tut-go:hover{transform:scale(1.05);}
+
+  /* ═══ 난이도 ═══ */
+  #diffScreen{position:fixed;inset:0;z-index:490;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;}
+  #diffScreen.show{display:flex;}
+  .d-t{font-family:'Black Han Sans';font-size:1.6rem;margin-bottom:0.3rem;}
+  .d-s{color:var(--dim);font-size:0.8rem;margin-bottom:1.5rem;}
+  .d-cs{display:flex;gap:0.8rem;flex-wrap:wrap;justify-content:center;margin-bottom:1.2rem;}
+  .d-c{width:130px;padding:1.2rem 0.8rem;background:var(--card);border:2px solid transparent;border-radius:14px;text-align:center;cursor:pointer;transition:0.3s;}
+  .d-c:hover{border-color:var(--me);transform:translateY(-2px);}.d-c.sel{border-color:var(--me);background:#ff6b3520;}
+  .d-ce{font-size:2rem;margin-bottom:0.3rem;}.d-cn{font-weight:900;font-size:1rem;margin-bottom:0.1rem;}.d-cd{font-size:0.68rem;color:var(--dim);}
+  .d-go{font-family:'Black Han Sans';font-size:1.1rem;padding:0.7rem 2.5rem;border:none;border-radius:50px;background:var(--me);color:#fff;cursor:pointer;}
+  .d-go:disabled{opacity:0.3;cursor:default;}
+
+  /* ═══ 게임 화면 ═══ */
+  #gameScreen{display:none;position:fixed;inset:0;}
+  #camFull{width:100%;height:100%;object-fit:cover;transform:scaleX(-1);position:absolute;inset:0;z-index:0;}
+  #overlay{position:absolute;inset:0;z-index:1;pointer-events:none;}
+
+  /* 컴퓨터 손 영역 (상단) - 손가락이 아래를 향함 */
+  .cpu-zone{
+    position:absolute;top:0;left:0;right:0;z-index:10;
+    display:flex;justify-content:center;gap:1.5rem;
+    padding:0.5rem 0.5rem 0;
+    background:linear-gradient(180deg,#000000ee 0%,#000000bb 70%,transparent 100%);
+    min-height:260px;
+  }
+
+  .cpu-hw{display:flex;flex-direction:column;align-items:center;position:relative;}
+  .cpu-hl{font-size:0.7rem;color:#ffffff88;margin-bottom:0.1rem;font-weight:700;}
+  .cpu-hand-svg{width:160px;height:220px;}
+  .cpu-fc{font-family:'Outfit';font-weight:900;font-size:1.6rem;color:#fff;margin-top:-0.3rem;text-shadow:0 2px 6px #000;}
+
+  /* 타겟 영역 표시 (공격시 손가락이 여기 넘으면 공격) */
+  .target-zone{
+    position:absolute;top:0;left:0;right:0;height:38%;z-index:5;
+    pointer-events:none;
+    border-bottom:3px solid transparent;
+    transition:all 0.3s;
+  }
+  .target-zone.active{
+    border-bottom:3px solid #ff6b3588;
+    background:linear-gradient(180deg, transparent 60%, #ff6b3512 100%);
+  }
+  .target-zone.active::before{
+    content:'';
+    position:absolute;bottom:-2px;left:0;right:0;height:4px;
+    background:linear-gradient(90deg, transparent, #ff6b35aa, transparent);
+    animation:linePulse 1.5s ease-in-out infinite;
+  }
+  @keyframes linePulse{
+    0%,100%{opacity:0.4;}
+    50%{opacity:1;}
+  }
+  .target-zone.active::after{
+    content:'⚔️ 이 선 위로 손을 올리면 공격!';
+    position:absolute;bottom:8px;left:50%;transform:translateX(-50%);
+    font-size:0.75rem;color:#ff6b35cc;white-space:nowrap;
+    font-weight:900;
+    text-shadow:0 1px 4px #000;
+    background:#00000088;padding:0.2rem 0.8rem;border-radius:6px;
+  }
+
+  /* 내 손 정보 */
+  .my-info{
+    position:absolute;z-index:15;pointer-events:none;
+    display:flex;flex-direction:column;align-items:center;
+  }
+  .my-info-l{bottom:18%;left:12%;}
+  .my-info-r{bottom:18%;right:12%;}
+  .my-num{font-family:'Outfit';font-weight:900;font-size:2.8rem;text-shadow:0 2px 10px #000,0 0 25px var(--me);line-height:1;}
+  .my-lbl{font-size:0.65rem;font-weight:700;text-shadow:0 1px 4px #000;}
+  .my-info-l .my-num{color:var(--me);}.my-info-l .my-lbl{color:var(--me);}
+  .my-info-r .my-num{color:var(--gold);}.my-info-r .my-lbl{color:var(--gold);}
+
+  /* 상태 */
+  .st-bar{
+    position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:20;
+    font-family:'Black Han Sans';font-size:clamp(1rem,3.5vw,1.5rem);
+    padding:0.5rem 1.2rem;border-radius:10px;
+    background:#000000bb;backdrop-filter:blur(6px);
+    text-align:center;pointer-events:none;transition:opacity 0.3s;
+  }
+
+  /* 하단 */
+  .bot-ui{
+    position:absolute;bottom:0;left:0;right:0;z-index:10;
+    padding:0.6rem 1rem;
+    background:linear-gradient(0deg,#000000cc 0%,#00000066 70%,transparent 100%);
+    display:flex;justify-content:space-between;align-items:flex-end;
+  }
+  .sc-box{font-family:'Outfit';font-weight:700;font-size:0.8rem;background:#ffffff15;backdrop-filter:blur(5px);padding:0.25rem 0.7rem;border-radius:8px;}
+  .b-btn{font-family:'Noto Sans KR';font-weight:700;font-size:0.75rem;padding:0.35rem 0.7rem;border:none;border-radius:8px;cursor:pointer;background:#ffffff20;color:#fff;backdrop-filter:blur(5px);}
+
+  /* 이펙트 */
+  .clash-fx{position:absolute;z-index:30;pointer-events:none;font-size:3rem;animation:clA .6s ease-out forwards;}
+  @keyframes clA{0%{transform:scale(.5);opacity:1;}50%{transform:scale(1.5);opacity:1;}100%{transform:scale(2);opacity:0;}}
+  .num-pop{position:absolute;z-index:25;pointer-events:none;font-family:'Outfit';font-weight:900;font-size:2rem;animation:nP 1s ease-out forwards;}
+  @keyframes nP{0%{transform:translateY(0) scale(.8);opacity:1;}100%{transform:translateY(-60px) scale(1.2);opacity:0;}}
+
+  /* CPU 공격 손 모션 - 위에서 내 손까지 내려와서 치기 */
+  .cpu-atk-hand{
+    position:absolute;z-index:35;pointer-events:none;
+    width:130px;height:180px;
+    animation:cpuSwing 1s ease-in forwards;
+  }
+  @keyframes cpuSwing{
+    0%{transform:translateY(0px) scale(0.8);opacity:0;}
+    15%{transform:translateY(20px) scale(1);opacity:1;}
+    60%{transform:translateY(280px) scale(1.1);opacity:1;}
+    72%{transform:translateY(260px) scale(1);opacity:1;}
+    85%{transform:translateY(270px) scale(1.05);opacity:0.8;}
+    100%{transform:translateY(280px) scale(1);opacity:0;}
+  }
+
+  /* 실황 메시지 (중앙 큰 글씨) */
+  .play-msg{
+    position:absolute;left:50%;top:45%;transform:translate(-50%,-50%);
+    z-index:28;pointer-events:none;text-align:center;
+    animation:msgIn 2.5s ease-out forwards;
+  }
+  .play-msg.fast{animation:msgIn 1.8s ease-out forwards;}
+  @keyframes msgIn{
+    0%{opacity:0;transform:translate(-50%,-50%) scale(0.8);}
+    10%{opacity:1;transform:translate(-50%,-50%) scale(1);}
+    70%{opacity:1;transform:translate(-50%,-50%) scale(1);}
+    100%{opacity:0;transform:translate(-50%,-50%) scale(1.05);}
+  }
+  .pm-line1{
+    font-family:'Black Han Sans';font-size:clamp(1rem,3vw,1.4rem);
+    color:#ffffffcc;margin-bottom:0.2rem;
+    text-shadow:0 2px 8px #000;
+  }
+  .pm-line2{
+    font-family:'Outfit';font-weight:900;font-size:clamp(1.5rem,5vw,2.2rem);
+    color:var(--gold);
+    text-shadow:0 2px 10px #000;
+  }
+  .pm-line3{
+    font-size:0.85rem;color:var(--dim);margin-top:0.2rem;
+    text-shadow:0 1px 4px #000;
+  }
+
+  /* 손가락 안내 팝업 */
+  .finger-guide{
+    position:absolute;z-index:22;pointer-events:none;
+    padding:0.4rem 0.8rem;border-radius:8px;
+    background:#000000cc;backdrop-filter:blur(4px);
+    font-weight:700;font-size:0.85rem;
+    animation:fgPop 3s ease-out forwards;
+    text-align:center;
+  }
+  @keyframes fgPop{
+    0%{opacity:0;transform:translate(-50%,-50%) scale(0.8);}
+    15%{opacity:1;transform:translate(-50%,-50%) scale(1);}
+    75%{opacity:1;}
+    100%{opacity:0;}
+  }
+
+  /* 안내 */
+  .guide-ov{position:absolute;inset:0;z-index:40;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#000000cc;animation:fi .5s ease-out;}
+  .guide-ov.hidden{display:none;}
+  @keyframes fi{from{opacity:0;}to{opacity:1;}}
+  .g-text{font-family:'Black Han Sans';font-size:clamp(1.2rem,4vw,1.8rem);text-align:center;margin-bottom:0.4rem;}
+  .g-sub{font-size:0.85rem;color:var(--dim);text-align:center;line-height:1.6;}
+  .g-hand{font-size:4rem;animation:hw 1s infinite;}
+  @keyframes hw{0%,100%{transform:rotate(0);}25%{transform:rotate(15deg);}75%{transform:rotate(-15deg);}}
+
+  /* 쪼개기 안내 오버레이 */
+  .split-guide{
+    position:absolute;inset:0;z-index:45;display:none;
+    flex-direction:column;align-items:center;justify-content:center;
+    background:#000000dd;
+  }
+  .split-guide.show{display:flex;}
+  .sg-text{font-family:'Black Han Sans';font-size:1.3rem;margin-bottom:0.3rem;color:var(--gold);}
+  .sg-sub{font-size:0.85rem;color:var(--dim);margin-bottom:1rem;text-align:center;line-height:1.6;}
+  .sg-hands{display:flex;gap:2rem;margin-bottom:0.5rem;}
+  .sg-h{display:flex;flex-direction:column;align-items:center;}
+  .sg-h-n{font-family:'Outfit';font-weight:900;font-size:3rem;line-height:1;}
+  .sg-h-l{font-size:0.7rem;color:var(--dim);}
+  .sg-ok{font-family:'Black Han Sans';font-size:1rem;padding:0.6rem 2rem;border:none;border-radius:12px;background:var(--gold);color:var(--bg);cursor:pointer;margin-top:0.5rem;}
+  .sg-cancel{font-size:0.75rem;color:var(--muted);background:none;border:none;cursor:pointer;margin-top:0.4rem;}
+
+  /* 결과 */
+  .ov{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#000000dd;z-index:100;opacity:0;pointer-events:none;transition:opacity .3s;}
+  .ov.show{opacity:1;pointer-events:auto;}
+  .ovb{text-align:center;padding:2rem;}
+  .ovb h2{font-family:'Black Han Sans';font-size:clamp(1.8rem,5vw,3rem);margin-bottom:0.4rem;}
+  .ovb .os{font-size:0.9rem;color:var(--dim);margin-bottom:0.3rem;}
+  .ovb .ost{font-size:0.75rem;color:var(--muted);margin-bottom:1.2rem;}
+  .ovbs{display:flex;gap:0.6rem;justify-content:center;}
+  .ob{font-family:'Noto Sans KR';font-weight:700;font-size:0.9rem;padding:0.6rem 1.5rem;border:none;border-radius:12px;cursor:pointer;}
+  .ob-p{background:var(--me);color:#fff;}.ob-g{background:var(--card);color:#fff;border:1px solid var(--border);}
+  .conf{position:fixed;border-radius:2px;z-index:110;animation:cf 3s ease-out forwards;}
+  @keyframes cf{0%{transform:translateY(-10px) rotate(0) scale(1);opacity:1;}100%{transform:translateY(100vh) rotate(720deg) scale(.5);opacity:0;}}
+
+  /* 터치 모드: 내 손 */
+  .my-hands-touch{
+    position:absolute;bottom:50px;left:0;right:0;z-index:12;
+    display:flex;justify-content:center;gap:1.5rem;
+    padding:0.5rem;
+  }
+  .my-hw{
+    display:flex;flex-direction:column;align-items:center;cursor:pointer;
+    transition:transform 0.2s;
+  }
+  .my-hw:hover{transform:scale(1.05);}
+  .my-hw:active{transform:scale(0.95);}
+  .my-hand-svg{width:130px;height:180px;transform:rotate(180deg);filter:hue-rotate(180deg) saturate(0.6) brightness(1.3);}
+  .my-fc{font-family:'Outfit';font-weight:900;font-size:1.4rem;color:var(--me);margin-top:-0.2rem;text-shadow:0 2px 6px #000;}
+  .my-hw.dead-hand{opacity:0.2;pointer-events:none;}
+  .my-hw.selected-hand{transform:scale(1.1);filter:drop-shadow(0 0 12px var(--me));}
+
+  /* 터치 모드: 상대 손 선택 */
+  .touch-target{
+    position:absolute;inset:0;z-index:50;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:#000000dd;
+  }
+  .tt-text{font-family:'Black Han Sans';font-size:1.3rem;margin-bottom:1rem;color:var(--gold);}
+  .tt-btns{display:flex;gap:1rem;}
+  .tt-btn{
+    font-family:'Noto Sans KR';font-weight:900;font-size:1.1rem;
+    padding:1rem 2rem;border:none;border-radius:14px;
+    background:var(--card);color:#fff;border:2px solid var(--border);
+    cursor:pointer;transition:all 0.2s;
+  }
+  .tt-btn:hover{border-color:var(--me);transform:scale(1.05);}
+  .tt-cancel{font-size:0.75rem;color:var(--muted);background:none;border:none;cursor:pointer;margin-top:0.8rem;}
+
+  /* 터치 모드: 쪼개기 버튼 */
+  .touch-split-btn{
+    position:absolute;bottom:240px;left:50%;transform:translateX(-50%);z-index:12;
+    font-family:'Noto Sans KR';font-weight:700;font-size:0.85rem;
+    padding:0.5rem 1.2rem;border:none;border-radius:10px;
+    background:#fbbf2440;color:var(--gold);cursor:pointer;
+    backdrop-filter:blur(4px);
+  }
+  .touch-split-btn:disabled{opacity:0.2;cursor:default;}
+
+  .b-btn-share{background:#ff6b3530;color:var(--me);}
+
+  /* 공유 모달 */
+  .share-modal{
+    position:fixed;inset:0;z-index:120;
+    display:none;align-items:center;justify-content:center;
+    background:#000000ee;backdrop-filter:blur(8px);
+  }
+  .share-modal.show{display:flex;}
+  .share-box{
+    background:var(--card);border:1px solid var(--border);border-radius:20px;
+    padding:2rem;text-align:center;max-width:340px;width:90%;
+  }
+  .share-title{font-family:'Black Han Sans';font-size:1.3rem;margin-bottom:0.3rem;color:var(--gold);}
+  .share-desc{font-size:0.8rem;color:var(--dim);margin-bottom:1.2rem;}
+  .share-btns{display:flex;flex-direction:column;gap:0.5rem;margin-bottom:0.8rem;}
+  .share-btn{
+    font-family:'Noto Sans KR';font-weight:700;font-size:0.9rem;
+    padding:0.7rem 1rem;border:none;border-radius:10px;
+    cursor:pointer;transition:all 0.2s;text-align:center;
+  }
+  .share-btn:hover{transform:scale(1.02);}
+  .s-kakao{background:#FEE500;color:#3C1E1E;}
+  .s-twitter{background:#1a1a2e;color:#fff;border:1px solid #333;}
+  .s-facebook{background:#1877F2;color:#fff;}
+  .s-line{background:#06C755;color:#fff;}
+  .s-copy{background:#333;color:#fff;}
+  .share-copied{font-size:0.8rem;color:var(--cpu);margin-bottom:0.5rem;}
+  .share-close{
+    font-size:0.8rem;color:var(--muted);background:none;border:none;cursor:pointer;margin-top:0.3rem;
+  }
+
+  /* 터치 모드 배경 */
+  .touch-bg{
+    position:absolute;inset:0;z-index:0;
+    background:linear-gradient(180deg, #0a0a1a 0%, #141428 50%, #1a1a30 100%);
+  }
+  /* 도움말 패널 */
+  .help-panel{
+    position:fixed;inset:0;z-index:60;
+    display:none;flex-direction:column;align-items:center;
+    background:#000000ee;backdrop-filter:blur(8px);
+    overflow-y:auto;-webkit-overflow-scrolling:touch;
+  }
+  .help-panel.show{display:flex;}
+  .help-inner{max-width:440px;width:92%;padding:1.5rem 0 2rem;}
+  .help-title{font-family:'Black Han Sans';font-size:1.4rem;text-align:center;margin-bottom:1rem;color:var(--gold);}
+  .help-section{margin-bottom:1rem;}
+  .help-section-t{font-weight:900;font-size:0.8rem;color:var(--me);margin-bottom:0.4rem;padding-left:0.2rem;}
+  .help-cards{display:flex;flex-direction:column;gap:0.5rem;}
+  .help-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.7rem 0.9rem;display:flex;align-items:center;gap:0.7rem;}
+  .help-icon{font-size:1.4rem;width:32px;text-align:center;flex-shrink:0;}
+  .help-text{flex:1;}
+  .help-text-t{font-weight:900;font-size:0.78rem;margin-bottom:0.05rem;}
+  .help-text-d{font-size:0.68rem;color:var(--dim);line-height:1.4;}
+  .help-close{
+    display:block;margin:1rem auto 0;
+    font-family:'Noto Sans KR';font-weight:700;font-size:0.9rem;
+    padding:0.5rem 2rem;border:none;border-radius:10px;
+    background:var(--me);color:#fff;cursor:pointer;
   }
 </style>
 </head>
 <body>
 
-<!-- ── 네비게이션 ── -->
-<nav>
-  <a href="#" class="nav-logo">KKAEBI</a>
-  <ul class="nav-links" id="navLinks">
-    <li><a href="#games">뚝딱 프로그램</a></li>
-    <li><a href="#resources">자료실</a></li>
-    <li><a href="#courses">강의</a></li>
-    <li><a href="#community">커뮤니티</a></li>
-    <li><a href="#about">소개</a></li>
-  </ul>
-  <button class="nav-mobile-btn" onclick="toggleNav()">☰</button>
-</nav>
-
-<!-- ── 히어로 ── -->
-<section class="hero">
-  <div class="hero-badge">
-    <span class="dot"></span>
-    무쓸모 뚝딱 프로그램 시리즈 업데이트 중
-  </div>
-  <h1><span class="highlight">KKAEBI</span></h1>
-  <p class="hero-sub">쓸모없는 걸 진심으로 만드는 사람.<br>AI 콘텐츠 크리에이터 & 에듀케이터.</p>
-  <div class="hero-cta">
-    <a href="#games" class="btn btn-primary">🎮 프로그램 구경하기</a>
-    <a href="#about" class="btn btn-ghost">👋 KKAEBI는 누구?</a>
-  </div>
-</section>
-
-<!-- ── 무쓸모 뚝딱 프로그램 ── -->
-<section id="games">
-  <div class="reveal">
-    <div class="section-label">PLAY</div>
-    <h2 class="section-title">무쓸모 뚝딱 프로그램</h2>
-    <p class="section-desc">아무 쓸모 없는 프로그램을 전력을 다해 만들어 봤습니다.</p>
-  </div>
-
-  <div class="card-grid">
-    <!-- 젓가락 게임 -->
-    <a href="games/chopsticks.html" class="game-card reveal">
-      <div class="card-thumb" style="background: linear-gradient(135deg, #1a1a2e, #16213e);">
-        🥢
-        <span class="card-tag tag-game">GAME</span>
-      </div>
-      <div class="card-body">
-        <h3>젓가락 게임</h3>
-        <p>핸드트래킹으로 즐기는 클래식 젓가락 게임. 친구 손가락을 죽여라.</p>
-      </div>
-      <div class="card-footer">
-        <span class="card-play">플레이 →</span>
-        <span class="card-yt">📺 영상 보기</span>
-      </div>
-    </a>
-
-    <!-- 커밍순 카드들 -->
-    <div class="game-card reveal" style="opacity: 0.5; pointer-events: none;">
-      <div class="card-thumb" style="background: linear-gradient(135deg, #1a1a2e, #0f3460);">
-        🎯
-        <span class="card-tag tag-coming">COMING SOON</span>
-      </div>
-      <div class="card-body">
-        <h3>리액션 스피드 대결</h3>
-        <p>누가 더 빠른지, 0.001초의 승부.</p>
-      </div>
-      <div class="card-footer">
-        <span class="card-play" style="color: var(--text-muted);">준비 중...</span>
+<!-- 튜토리얼 -->
+<div id="tutorial">
+  <div class="tut-c">
+    <div class="tut-t">🥢 젓가락 게임</div>
+    <p class="tut-s">무쓸모 뚝딱 프로그램 #1</p>
+    <div class="rg">
+      <div class="rc"><div class="rn">1</div><div class="rv"><span class="rvn" style="color:var(--me)">☝️1</span>&nbsp;<span class="rvn" style="color:var(--me)">☝️1</span></div><div class="rt"><div class="rt-t">양손 1개씩 시작</div><div class="rt-d">검지를 하나씩 펴고 시작</div></div></div>
+      <div class="rc"><div class="rn">2</div><div class="rv"><span class="rvn" style="color:var(--me)">2</span><span class="rvs">+</span><span class="rvn" style="color:var(--cpu)">1</span><span class="rvs">=</span><span class="rvn" style="color:var(--cpu)">3</span></div><div class="rt"><div class="rt-t">터치 = 숫자 합산</div><div class="rt-d">내 손가락 수가 상대에 더해짐</div></div></div>
+      <div class="rc"><div class="rn">3</div><div class="rv"><span class="rvn" style="color:var(--me)">2</span><span class="rvs">+</span><span class="rvn" style="color:var(--cpu)">3</span><span class="rvs">=</span><span class="rvn" style="color:var(--red)">5💀</span></div><div class="rt"><div class="rt-t">5 이상 = 사망!</div><div class="rt-d">5 이상이면 그 손은 죽음</div></div></div>
+      <div class="rc"><div class="rn">4</div><div class="rv"><span class="rvn" style="color:var(--red)">💀0</span>&nbsp;<span class="rvn" style="color:var(--me)">4</span><span class="rvs">→</span><span class="rvn" style="color:var(--gold)">1,3</span></div><div class="rt"><div class="rt-t">쪼개기 = 부활</div><div class="rt-d">합 유지하며 자유 분배</div></div></div>
+    </div>
+    <div class="ctrl-s">
+      <div class="ctrl-t">📷 조작법</div>
+      <div class="ctrl-rows">
+        <div class="ctrl-row"><div class="ctrl-icon">👆</div><div class="ctrl-desc"><strong>공격:</strong> 손을 화면 위쪽 컴퓨터 손 쪽으로 올려서 치기</div></div>
+        <div class="ctrl-row"><div class="ctrl-icon">👏</div><div class="ctrl-desc"><strong>쪼개기:</strong> 양손을 가운데로 모아 부딪히기 → 원하는 숫자로 손가락 펴기</div></div>
+        <div class="ctrl-row"><div class="ctrl-icon">🖐️</div><div class="ctrl-desc"><strong>대기:</strong> 손을 화면 아래쪽에 놓고 있으면 안전 (실수 방지)</div></div>
       </div>
     </div>
+    <button class="tut-go" onclick="skipTut()">게임 시작 🎮</button>
+  </div>
+</div>
 
-    <div class="game-card reveal" style="opacity: 0.5; pointer-events: none;">
-      <div class="card-thumb" style="background: linear-gradient(135deg, #1a1a2e, #1b1b3a);">
-        🖐️
-        <span class="card-tag tag-coming">COMING SOON</span>
-      </div>
-      <div class="card-body">
-        <h3>하이파이브 싱크로</h3>
-        <p>타이밍을 맞춰라. 0.05초의 기적.</p>
-      </div>
-      <div class="card-footer">
-        <span class="card-play" style="color: var(--text-muted);">준비 중...</span>
-      </div>
+<!-- 난이도 -->
+<div id="diffScreen">
+  <div class="d-t">난이도 선택</div>
+  <p class="d-s">상대의 실력을 골라주세요</p>
+  <div class="d-cs">
+    <div class="d-c" onclick="pDiff('easy')" id="d-easy"><div class="d-ce">😴</div><div class="d-cn">하수</div><div class="d-cd">랜덤으로 찍음</div></div>
+    <div class="d-c" onclick="pDiff('medium')" id="d-medium"><div class="d-ce">🤔</div><div class="d-cn">중수</div><div class="d-cd">좀 생각함</div></div>
+    <div class="d-c" onclick="pDiff('hard')" id="d-hard"><div class="d-ce">😈</div><div class="d-cn">고수</div><div class="d-cd">자비 없음</div></div>
+  </div>
+  <p class="d-s" style="margin-top:1rem;margin-bottom:0.8rem;">조작 방식</p>
+  <div class="d-cs">
+    <div class="d-c" onclick="pMode('cam')" id="m-cam"><div class="d-ce">📷</div><div class="d-cn">카메라</div><div class="d-cd">손으로 직접 조작</div></div>
+    <div class="d-c" onclick="pMode('touch')" id="m-touch"><div class="d-ce">👆</div><div class="d-cn">터치/클릭</div><div class="d-cd">화면 터치로 조작</div></div>
+  </div>
+  <button class="d-go" id="dGoBtn" onclick="launch()" disabled>난이도와 모드를 골라주세요</button>
+</div>
+
+<!-- 게임 -->
+<div id="gameScreen">
+  <!-- 상단 바 -->
+  <div style="position:absolute;top:0;left:0;right:0;z-index:11;display:flex;align-items:center;justify-content:space-between;padding:0.4rem 0.8rem;background:#000000cc;backdrop-filter:blur(4px);">
+    <span style="font-family:'Outfit';font-weight:900;font-size:0.85rem;color:var(--me);">🥢 CHOPSTICKS</span>
+    <span id="gDf" style="font-size:0.7rem;font-weight:700;color:var(--dim);background:var(--card);padding:0.15rem 0.5rem;border-radius:5px;">하수</span>
+  </div>
+
+  <video id="camFull" autoplay playsinline muted></video>
+  <canvas id="overlay"></canvas>
+
+  <!-- 타겟 영역 (손이 여기 올라와야 공격) -->
+  <div class="target-zone" id="targetZone"></div>
+
+  <!-- 컴퓨터 손 (위에서 아래로, 손가락이 👇 방향) -->
+  <div class="cpu-zone" id="cpuZone">
+    <div class="cpu-hw" id="cpuLWrap">
+      <div class="cpu-hl">왼손</div>
+      <svg class="cpu-hand-svg" id="svgCL" viewBox="0 0 110 160"></svg>
+      <div class="cpu-fc" id="cpuLC">1</div>
+    </div>
+    <div style="display:flex;align-items:center;padding:0 0.3rem;">
+      <span style="font-family:'Outfit';font-weight:900;font-size:0.7rem;color:#ffffff88;letter-spacing:2px;writing-mode:vertical-rl;">COMPUTER</span>
+    </div>
+    <div class="cpu-hw" id="cpuRWrap">
+      <div class="cpu-hl">오른손</div>
+      <svg class="cpu-hand-svg" id="svgCR" viewBox="0 0 110 160"></svg>
+      <div class="cpu-fc" id="cpuRC">1</div>
     </div>
   </div>
-</section>
 
-<div class="divider"><hr></div>
+  <!-- 내 손 정보 -->
+  <div class="my-info my-info-l"><div class="my-num" id="myLC">1</div><div class="my-lbl">왼손</div></div>
+  <div class="my-info my-info-r"><div class="my-num" id="myRC">1</div><div class="my-lbl">오른손</div></div>
 
-<!-- ── 자료실 ── -->
-<section id="resources">
-  <div class="reveal">
-    <div class="section-label">RESOURCES</div>
-    <h2 class="section-title">자료실</h2>
-    <p class="section-desc">프롬프트, 템플릿, 가이드. 쓸모 있는 것도 만듭니다.</p>
-  </div>
-
-  <div class="resource-grid">
-    <div class="resource-card reveal">
-      <div class="resource-icon">📝</div>
-      <h4>유튜브 스크립트 프롬프트 팩</h4>
-      <p>조회수 터지는 스크립트를 AI로 뽑는 마스터 프롬프트</p>
-      <span class="resource-price price-free">무료</span>
+  <!-- 터치 모드: 내 손 SVG (하단) -->
+  <div class="my-hands-touch" id="myHandsTouch" style="display:none;">
+    <div class="my-hw" id="myLBox" onclick="touchAtk('l')">
+      <svg class="my-hand-svg" id="svgML" viewBox="0 0 110 160"></svg>
+      <div class="my-fc" id="myLCt">1</div>
     </div>
-
-    <div class="resource-card reveal">
-      <div class="resource-icon">🎬</div>
-      <h4>CapCut 편집 템플릿</h4>
-      <p>페이스리스 채널용 8트랙 편집 구조 템플릿</p>
-      <span class="resource-price price-free">무료</span>
-    </div>
-
-    <div class="resource-card reveal">
-      <div class="resource-icon">🤖</div>
-      <h4>AI 자동화 파이프라인 가이드</h4>
-      <p>TTS, 이미지, 영상 생성까지 원스톱 자동화</p>
-      <span class="resource-price price-paid">유료</span>
-    </div>
-
-    <div class="resource-card reveal">
-      <div class="resource-icon">🌏</div>
-      <h4>해외 채널 운영 노하우</h4>
-      <p>일본, 영어권 채널 운영 실전 데이터</p>
-      <span class="resource-price price-paid">유료</span>
+    <div class="my-hw" id="myRBox" onclick="touchAtk('r')">
+      <svg class="my-hand-svg" id="svgMR" viewBox="0 0 110 160"></svg>
+      <div class="my-fc" id="myRCt">1</div>
     </div>
   </div>
-</section>
 
-<div class="divider"><hr></div>
-
-<!-- ── 강의 ── -->
-<section id="courses">
-  <div class="reveal">
-    <div class="section-label">COURSES</div>
-    <h2 class="section-title">강의</h2>
-    <p class="section-desc">AI로 유튜브 채널 만드는 법, 처음부터 끝까지.</p>
+  <!-- 터치 모드: 상대 손 선택 오버레이 -->
+  <div class="touch-target" id="touchTarget" style="display:none;">
+    <div class="tt-text">어느 손을 공격할까요?</div>
+    <div class="tt-btns">
+      <button class="tt-btn" onclick="touchTargetSel('l')">👈 왼손</button>
+      <button class="tt-btn" onclick="touchTargetSel('r')">👉 오른손</button>
+    </div>
+    <button class="tt-cancel" onclick="touchTargetCancel()">취소</button>
   </div>
 
-  <div class="course-list">
-    <a href="#" class="course-item reveal">
-      <span class="course-emoji">🚀</span>
-      <div class="course-info">
-        <h4>AI 페이스리스 유튜브 입문</h4>
-        <p>얼굴 안 나오고, AI로 영상 만들어서, 해외 수익까지</p>
-      </div>
-      <span class="course-badge badge-soon">준비 중</span>
-    </a>
+  <div class="st-bar" id="stBar">손을 들어주세요 ✋</div>
 
-    <a href="#" class="course-item reveal">
-      <span class="course-emoji">🎯</span>
-      <div class="course-info">
-        <h4>다국어 채널 스케일링 마스터</h4>
-        <p>하나의 콘텐츠로 5개국 채널 운영하는 실전 전략</p>
-      </div>
-      <span class="course-badge badge-soon">준비 중</span>
-    </a>
-  </div>
-</section>
-
-<div class="divider"><hr></div>
-
-<!-- ── 커뮤니티 ── -->
-<section id="community">
-  <div class="reveal">
-    <div class="section-label">COMMUNITY</div>
-    <h2 class="section-title">커뮤니티</h2>
-    <p class="section-desc">같이 만들고, 같이 성장하는 공간.</p>
+  <div class="bot-ui">
+    <div class="sc-box"><span style="color:var(--me)" id="sMe">0</span><span style="color:var(--muted)"> : </span><span style="color:var(--cpu)" id="sCpu">0</span></div>
+    <div style="display:flex;gap:0.3rem;flex-wrap:wrap;">
+      <button class="b-btn" onclick="toggleHelp()">게임규칙</button>
+      <button class="b-btn" onclick="resetRound()">🔄 재시작</button>
+      <button class="b-btn" onclick="location.href='../index.html'">🏠 홈</button>
+      <button class="b-btn b-btn-share" onclick="toggleShare()">📤 공유</button>
+    </div>
   </div>
 
-  <div class="community-cards">
-    <a href="#" class="community-card reveal">
-      <div class="icon">💬</div>
-      <h4>카카오 오픈채팅</h4>
-      <p>질문, 공유, 잡담 다 환영</p>
-    </a>
-
-    <a href="#" class="community-card reveal">
-      <div class="icon">🎮</div>
-      <h4>디스코드</h4>
-      <p>실시간 소통 & 작업 공유</p>
-    </a>
-
-    <a href="#" class="community-card reveal">
-      <div class="icon">📢</div>
-      <h4>공지 채널</h4>
-      <p>새 프로그램 & 강의 업데이트</p>
-    </a>
+  <!-- 손 안내 -->
+  <div class="guide-ov" id="handGuide">
+    <div class="g-hand">🖐️</div>
+    <div class="g-text">양손을 카메라에 보여주세요</div>
+    <div class="g-sub">손이 인식되면 자동으로 시작합니다</div>
   </div>
-</section>
 
-<div class="divider"><hr></div>
+  <!-- 도움말 패널 -->
+  <div class="help-panel" id="helpPanel">
+    <div class="help-inner">
+      <div class="help-title">📋 규칙 & 조작법</div>
 
-<!-- ── About ── -->
-<section id="about">
-  <div class="reveal">
-    <div class="about-layout">
-      <div class="about-avatar"><img src="image/profile.jpg" alt="KKAEBI" onerror="this.style.display='none';this.parentElement.textContent='🧊';"></div>
-      <div class="about-text">
-        <h3>KKAEBI</h3>
-        <div class="tagline">AI Content Creator & Educator</div>
-        <p>
-          쓸모없는 걸 진심으로 만들고, 쓸모있는 건 쉽게 알려주는 사람.<br>
-          AI를 활용한 콘텐츠 제작과 해외 유튜브 채널 운영을 하고 있습니다.<br>
-          누구나 AI로 크리에이터가 될 수 있다고 믿습니다.
-        </p>
-        <div class="social-links">
-          <a href="https://www.instagram.com/kkaebi.ai" class="social-link" target="_blank">📸 Instagram</a>
-          <a href="#" class="social-link" target="_blank">📺 YouTube</a>
-          <a href="https://www.instagram.com/kkaebi.ai" class="social-link" target="_blank">✉️ 문의하기</a>
+      <div class="help-section">
+        <div class="help-section-t">게임 규칙</div>
+        <div class="help-cards">
+          <div class="help-card"><div class="help-icon">☝️</div><div class="help-text"><div class="help-text-t">양손 1개씩 시작</div><div class="help-text-d">검지를 하나씩 펴고 시작</div></div></div>
+          <div class="help-card"><div class="help-icon">👆</div><div class="help-text"><div class="help-text-t">터치 = 숫자 합산</div><div class="help-text-d">내 손가락 수가 상대에 더해짐 (2+1=3)</div></div></div>
+          <div class="help-card"><div class="help-icon">💀</div><div class="help-text"><div class="help-text-t">5 이상 = 사망!</div><div class="help-text-d">5 이상이 되면 그 손은 죽음</div></div></div>
+          <div class="help-card"><div class="help-icon">✌️</div><div class="help-text"><div class="help-text-t">쪼개기 = 부활</div><div class="help-text-d">합 유지하며 자유 분배 (현 상태 유지 금지)</div></div></div>
         </div>
       </div>
+
+      <div class="help-section">
+        <div class="help-section-t">조작법</div>
+        <div class="help-cards">
+          <div class="help-card"><div class="help-icon">👆</div><div class="help-text"><div class="help-text-t">공격하기</div><div class="help-text-d">손을 화면 위쪽 컴퓨터 손 영역까지 올리세요. 왼쪽/오른쪽 위치에 따라 상대 손이 결정됩니다.</div></div></div>
+          <div class="help-card"><div class="help-icon">👏</div><div class="help-text"><div class="help-text-t">쪼개기</div><div class="help-text-d">양손을 화면 가운데로 가까이 모으세요. 그 다음 원하는 수만큼 손가락을 펴면 됩니다.</div></div></div>
+          <div class="help-card"><div class="help-icon">🖐️</div><div class="help-text"><div class="help-text-t">대기 (안전)</div><div class="help-text-d">손을 화면 아래쪽에 놓고 있으면 실수로 공격이 나가지 않습니다.</div></div></div>
+          <div class="help-card"><div class="help-icon">⌨️</div><div class="help-text"><div class="help-text-t">키보드 폴백</div><div class="help-text-d">Q=왼손 공격, W=오른손 공격, S=쪼개기</div></div></div>
+        </div>
+      </div>
+
+      <button class="help-close" onclick="toggleHelp()">닫기</button>
     </div>
   </div>
-</section>
 
-<!-- ── 푸터 ── -->
-<footer>
-  <p>© 2025 KKAEBI. 쓸모없는 것들의 가치를 믿습니다.</p>
-</footer>
+  <!-- 쪼개기 가이드 -->
+  <div class="split-guide" id="splitGuide">
+    <div class="sg-text">✌️ 쪼개기!</div>
+    <div class="sg-sub">원하는 만큼 손가락을 펴주세요<br>합계: <strong id="sgTotal">0</strong></div>
+    <div class="sg-hands">
+      <div class="sg-h"><div class="sg-h-n" id="sgL" style="color:var(--me)">0</div><div class="sg-h-l">왼손</div></div>
+      <div class="sg-h"><div class="sg-h-n" id="sgR" style="color:var(--gold)">0</div><div class="sg-h-l">오른손</div></div>
+    </div>
+    <div id="sgValid" style="font-size:0.75rem;color:var(--dim);margin-bottom:0.3rem;"></div>
+    <button class="sg-ok" id="sgOk" onclick="confirmSplit()">이대로 쪼개기!</button>
+    <button class="sg-cancel" onclick="cancelSplit()">취소</button>
+  </div>
+</div>
+
+<!-- 결과 -->
+<div class="ov" id="resOv">
+  <div class="ovb">
+    <h2 id="rT"></h2><p class="os" id="rS"></p><p class="ost" id="rSt"></p>
+    <div class="ovbs">
+      <button class="ob ob-p" onclick="rematch()">다시 하기</button>
+      <button class="ob ob-g" onclick="toggleShare()">📤 공유</button>
+      <button class="ob ob-g" onclick="goMenu()">메뉴로</button>
+    </div>
+  </div>
+</div>
+
+<!-- 공유 모달 -->
+<div class="share-modal" id="shareModal">
+  <div class="share-box">
+    <div class="share-title">📤 친구에게 공유하기</div>
+    <div class="share-desc">이 게임 해봐! 🥢 젓가락 게임</div>
+    <div class="share-btns">
+      <button class="share-btn s-kakao" onclick="shareKakao()">💬 카카오톡</button>
+      <button class="share-btn s-twitter" onclick="shareTwitter()">𝕏 트위터</button>
+      <button class="share-btn s-facebook" onclick="shareFacebook()">f 페이스북</button>
+      <button class="share-btn s-line" onclick="shareLine()">💚 라인</button>
+      <button class="share-btn s-copy" onclick="shareCopy()">🔗 링크 복사</button>
+    </div>
+    <div class="share-copied" id="shareCopied" style="display:none;">✅ 링크가 복사되었습니다!</div>
+    <button class="share-close" onclick="toggleShare()">닫기</button>
+  </div>
+</div>
+
+<video id="htV" style="display:none" autoplay playsinline></video>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3.1675466862/camera_utils.min.js"></script>
 
 <script>
-// 모바일 네비게이션
-function toggleNav() {
-  document.getElementById('navLinks').classList.toggle('open');
+// ═══ 사운드 시스템 (Web Audio API - 저작권 무관) ═══
+let audioCtx = null;
+function getAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
 }
 
-// 네비게이션 링크 클릭시 메뉴 닫기
-document.querySelectorAll('.nav-links a').forEach(link => {
-  link.addEventListener('click', () => {
-    document.getElementById('navLinks').classList.remove('open');
-  });
-});
+function sfxHit() {
+  const ctx = getAudio();
+  // 탁! 치는 소리
+  const o = ctx.createOscillator();
+  const g = ctx.createGain();
+  o.type = 'square';
+  o.frequency.setValueAtTime(200, ctx.currentTime);
+  o.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.1);
+  g.gain.setValueAtTime(0.3, ctx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+  o.connect(g); g.connect(ctx.destination);
+  o.start(); o.stop(ctx.currentTime + 0.15);
 
-// 스크롤 관찰 애니메이션
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('visible');
+  // 노이즈 (슬랩 질감)
+  const buf = ctx.createBuffer(1, ctx.sampleRate * 0.08, ctx.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * 0.2;
+  const n = ctx.createBufferSource();
+  const ng = ctx.createGain();
+  n.buffer = buf;
+  ng.gain.setValueAtTime(0.25, ctx.currentTime);
+  ng.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.08);
+  n.connect(ng); ng.connect(ctx.destination);
+  n.start(); n.stop(ctx.currentTime + 0.08);
+}
+
+function sfxKill() {
+  const ctx = getAudio();
+  // 으악! 죽는 소리
+  const o = ctx.createOscillator();
+  const g = ctx.createGain();
+  o.type = 'sawtooth';
+  o.frequency.setValueAtTime(400, ctx.currentTime);
+  o.frequency.exponentialRampToValueAtTime(60, ctx.currentTime + 0.4);
+  g.gain.setValueAtTime(0.25, ctx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+  o.connect(g); g.connect(ctx.destination);
+  o.start(); o.stop(ctx.currentTime + 0.4);
+}
+
+function sfxWin() {
+  const ctx = getAudio();
+  // 빠밤~ 승리 팡파레
+  const notes = [523, 659, 784, 1047]; // C5 E5 G5 C6
+  notes.forEach((freq, i) => {
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = 'triangle';
+    o.frequency.value = freq;
+    g.gain.setValueAtTime(0, ctx.currentTime + i * 0.15);
+    g.gain.linearRampToValueAtTime(0.2, ctx.currentTime + i * 0.15 + 0.05);
+    g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + i * 0.15 + 0.3);
+    o.connect(g); g.connect(ctx.destination);
+    o.start(ctx.currentTime + i * 0.15);
+    o.stop(ctx.currentTime + i * 0.15 + 0.3);
+  });
+}
+
+function sfxLose() {
+  const ctx = getAudio();
+  // 뚜뚜뚜... 패배
+  const notes = [392, 330, 262, 196]; // G4 E4 C4 G3
+  notes.forEach((freq, i) => {
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = 'sine';
+    o.frequency.value = freq;
+    g.gain.setValueAtTime(0, ctx.currentTime + i * 0.2);
+    g.gain.linearRampToValueAtTime(0.15, ctx.currentTime + i * 0.2 + 0.05);
+    g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + i * 0.2 + 0.25);
+    o.connect(g); g.connect(ctx.destination);
+    o.start(ctx.currentTime + i * 0.2);
+    o.stop(ctx.currentTime + i * 0.2 + 0.25);
+  });
+}
+
+function sfxSplit() {
+  const ctx = getAudio();
+  // 띵~ 쪼개기
+  const o = ctx.createOscillator();
+  const g = ctx.createGain();
+  o.type = 'sine';
+  o.frequency.setValueAtTime(880, ctx.currentTime);
+  o.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.2);
+  g.gain.setValueAtTime(0.15, ctx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+  o.connect(g); g.connect(ctx.destination);
+  o.start(); o.stop(ctx.currentTime + 0.2);
+}
+
+function sfxTurn() {
+  const ctx = getAudio();
+  // 뚝 - 턴 시작
+  const o = ctx.createOscillator();
+  const g = ctx.createGain();
+  o.type = 'sine';
+  o.frequency.value = 660;
+  g.gain.setValueAtTime(0.1, ctx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+  o.connect(g); g.connect(ctx.destination);
+  o.start(); o.stop(ctx.currentTime + 0.1);
+}
+
+function sfxCountdown() {
+  const ctx = getAudio();
+  const o = ctx.createOscillator();
+  const g = ctx.createGain();
+  o.type = 'sine';
+  o.frequency.value = 440;
+  g.gain.setValueAtTime(0.12, ctx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+  o.connect(g); g.connect(ctx.destination);
+  o.start(); o.stop(ctx.currentTime + 0.15);
+}
+
+// ═══ SVG: 이모지 노란색 도톰 둥근 손 (👇 방향) ═══
+function drawCpuSvg(svg, count, dead) {
+  const skin = '#FFCC4D';
+  const skinDark = '#F0A830';
+  const skinLight = '#FFE082';
+  const nail = '#FFEEBB';
+  const shadow = '#E09520';
+  const outline = '#D4911A';
+
+  if (dead) {
+    svg.innerHTML = `
+      <ellipse cx="55" cy="45" rx="40" ry="38" fill="#444" stroke="#555" stroke-width="2"/>
+      <text x="55" y="48" text-anchor="middle" fill="#ef4444" font-size="40">💀</text>
+      <text x="55" y="78" text-anchor="middle" fill="#777" font-size="12" font-weight="bold">OUT</text>`;
+    return;
+  }
+
+  let h = '';
+
+  // 손목 (위쪽)
+  h += `<rect x="30" y="0" width="50" height="24" rx="12" fill="${skin}" stroke="${outline}" stroke-width="1.5"/>`;
+
+  // 손바닥 (큰 둥근 덩어리)
+  h += `<rect x="14" y="14" width="82" height="74" rx="24" fill="${skin}" stroke="${outline}" stroke-width="2"/>`;
+  h += `<ellipse cx="55" cy="40" rx="30" ry="20" fill="${skinLight}" opacity="0.3"/>`;
+
+  // 엄지 (왼쪽, 도톰 둥글)
+  h += `<ellipse cx="12" cy="44" rx="14" ry="22" fill="${skin}" stroke="${outline}" stroke-width="1.5" transform="rotate(10, 12, 44)"/>`;
+  h += `<ellipse cx="10" cy="39" rx="6" ry="9" fill="${skinLight}" opacity="0.3"/>`;
+  h += `<ellipse cx="8" cy="62" rx="8" ry="6" fill="${nail}" stroke="${skinDark}" stroke-width="0.5"/>`;
+
+  // 손가락 (아래로, 도톰 소시지)
+  const fingers = [
+    { cx: 30, w: 18, maxH: 62 },
+    { cx: 50, w: 19, maxH: 72 },
+    { cx: 70, w: 18, maxH: 62 },
+    { cx: 88, w: 16, maxH: 50 },
+  ];
+
+  const patterns = { 0: [], 1: [0], 2: [0,1], 3: [0,1,2], 4: [0,1,2,3] };
+  const active = patterns[Math.min(count, 4)] || [];
+
+  fingers.forEach((f, i) => {
+    const isDown = active.includes(i);
+    const startY = 80;
+    const r = f.w / 2;
+
+    if (isDown) {
+      const len = f.maxH;
+      // 그림자
+      h += `<rect x="${f.cx - r + 2}" y="${startY + 3}" width="${f.w}" height="${len}" rx="${r}" fill="${shadow}" opacity="0.2"/>`;
+      // 본체 (도톰 둥글)
+      h += `<rect x="${f.cx - r}" y="${startY}" width="${f.w}" height="${len}" rx="${r}" fill="${skin}" stroke="${outline}" stroke-width="1.5"/>`;
+      // 광택
+      h += `<rect x="${f.cx - r + 3}" y="${startY + 8}" width="5" height="${len - 28}" rx="2.5" fill="${skinLight}" opacity="0.45"/>`;
+      // 마디
+      h += `<line x1="${f.cx - r + 4}" y1="${startY + 18}" x2="${f.cx + r - 4}" y2="${startY + 18}" stroke="${skinDark}" stroke-width="1.2" opacity="0.35" stroke-linecap="round"/>`;
+      h += `<line x1="${f.cx - r + 4}" y1="${startY + 35}" x2="${f.cx + r - 4}" y2="${startY + 35}" stroke="${skinDark}" stroke-width="1.2" opacity="0.35" stroke-linecap="round"/>`;
+      // 손톱
+      h += `<rect x="${f.cx - r + 3}" y="${startY + len - 18}" width="${f.w - 6}" height="18" rx="${(f.w - 6) / 2}" fill="${nail}" stroke="${skinDark}" stroke-width="0.5"/>`;
+      h += `<rect x="${f.cx - r + 5}" y="${startY + len - 15}" width="${f.w - 10}" height="6" rx="3" fill="#fff" opacity="0.5"/>`;
+    } else {
+      // 접힌 (짧은 도톰 볼록)
+      h += `<ellipse cx="${f.cx}" cy="${startY + 8}" rx="${r - 1}" ry="9" fill="${skinDark}" stroke="${shadow}" stroke-width="0.8" opacity="0.5"/>`;
     }
   });
-}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
 
-document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  svg.innerHTML = h;
+}
 
-// 네비게이션 스크롤 효과
-let lastScroll = 0;
-window.addEventListener('scroll', () => {
-  const nav = document.querySelector('nav');
-  const currentScroll = window.scrollY;
-  if (currentScroll > 100) {
-    nav.style.borderBottomColor = '#ffffff10';
-  } else {
-    nav.style.borderBottomColor = 'var(--border)';
+// ═══ 게임 상태 ═══
+let diff = null, scores = { me: 0, cpu: 0 }, turns = 0;
+let G = { me: { l: 1, r: 1 }, cpu: { l: 1, r: 1 }, phase: 'wait', over: false };
+let splitMode = false;
+
+function applyHit(v) { return v >= 5 ? 0 : v; }
+
+// ═══ 핸드트래킹 ═══
+let htOn = false, gestReady = true;
+let curL = 0, curR = 0;
+let handDetected = false;
+const COOL = 800;
+const TIPS = [8, 12, 16, 20];
+const cvs = document.getElementById('overlay');
+const ctx = cvs.getContext('2d');
+
+// 손 위치 추적
+let leftHandY = 1, rightHandY = 1; // 0=상단, 1=하단
+let leftHandX = 0.25, rightHandX = 0.75;
+let prevLeftInZone = false, prevRightInZone = false;
+const ATTACK_ZONE = 0.38; // 화면 상위 38%
+let leftHandClose = false, rightHandClose = false; // 양손이 가까이 있는지
+
+function cntF(lm, h) {
+  let c = 0;
+  if (h === 'Right') { if (lm[4].x < lm[3].x) c++; } else { if (lm[4].x > lm[3].x) c++; }
+  for (const t of TIPS) if (lm[t].y < lm[t - 2].y) c++;
+  return c;
+}
+
+async function initCam() {
+  try {
+    const st = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720, facingMode: 'user' } });
+    document.getElementById('camFull').srcObject = st;
+    const hv = document.getElementById('htV'); hv.srcObject = st;
+
+    const hands = new Hands({ locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/${f}` });
+    hands.setOptions({ maxNumHands: 2, modelComplexity: 1, minDetectionConfidence: 0.65, minTrackingConfidence: 0.5 });
+    hands.onResults(onHR);
+
+    const cam = new Camera(hv, { onFrame: async () => { await hands.send({ image: hv }); }, width: 1280, height: 720 });
+    cam.start(); htOn = true;
+
+    function resize() { cvs.width = window.innerWidth; cvs.height = window.innerHeight; }
+    resize(); window.addEventListener('resize', resize);
+
+    document.getElementById('gameScreen').style.display = 'block';
+    resetRound();
+  } catch (e) {
+    console.error('카메라 오류:', e);
+    // 카메라 실패 → 자동으로 터치 모드 전환
+    gameMode = 'touch';
+    initTouchMode();
   }
-  lastScroll = currentScroll;
-});
-</script>
+}
 
+function onHR(res) {
+  ctx.clearRect(0, 0, cvs.width, cvs.height);
+  let nL = 0, nR = 0;
+  let lTipY = 1, rTipY = 1, lX = 0.25, rX = 0.75;
+  let foundLeft = false, foundRight = false;
+
+  if (res.multiHandLandmarks && res.multiHandedness) {
+    for (let i = 0; i < res.multiHandLandmarks.length; i++) {
+      const lm = res.multiHandLandmarks[i];
+      const lb = res.multiHandedness[i].label;
+      const f = cntF(lm, lb);
+
+      // 손가락 끝 중 가장 높은 점 (y가 가장 작은 값)
+      const tipY = Math.min(lm[4].y, lm[8].y, lm[12].y, lm[16].y, lm[20].y);
+      const tipX = lm[12].x; // 중지 기준 x
+
+      if (lb === 'Right') { // 미러: Right=왼손
+        nL = f; lTipY = tipY; lX = 1 - tipX; foundLeft = true;
+      } else {
+        nR = f; rTipY = tipY; rX = 1 - tipX; foundRight = true;
+      }
+      drawHandGfx(lm, lb, f);
+    }
+
+    if (!handDetected && res.multiHandLandmarks.length >= 1) {
+      handDetected = true;
+      // 카운트다운 후 시작 (손 갖다대자마자 공격 방지)
+      gestReady = false;
+      const guide = document.getElementById('handGuide');
+      guide.querySelector('.g-text').textContent = '손 인식 완료!';
+      guide.querySelector('.g-sub').textContent = '3초 후 게임 시작...';
+      guide.querySelector('.g-hand').textContent = '3️⃣';
+      sfxCountdown();
+      setTimeout(() => {
+        guide.querySelector('.g-hand').textContent = '2️⃣';
+        guide.querySelector('.g-sub').textContent = '손을 아래로 내려주세요!';
+        sfxCountdown();
+      }, 1000);
+      setTimeout(() => {
+        guide.querySelector('.g-hand').textContent = '1️⃣';
+        sfxCountdown();
+      }, 2000);
+      setTimeout(() => {
+        guide.classList.add('hidden');
+        gestReady = true;
+        prevLeftInZone = leftHandY < ATTACK_ZONE;
+        prevRightInZone = rightHandY < ATTACK_ZONE;
+        sfxTurn();
+        setSt(gameMode==='touch'?'내 손을 터치해서 공격하세요 👆':'손을 올려서 공격하세요 👆');
+      }, 3000);
+    }
+  }
+
+  curL = nL; curR = nR;
+  leftHandY = lTipY; rightHandY = rTipY;
+  leftHandX = lX; rightHandX = rX;
+
+  // 양손 거리 체크 (쪼개기용)
+  if (foundLeft && foundRight) {
+    const dist = Math.abs(lX - rX);
+    leftHandClose = dist < 0.15;
+    rightHandClose = dist < 0.15;
+  } else {
+    leftHandClose = false; rightHandClose = false;
+  }
+
+  // 쪼개기 모드: 실시간 손가락 수 표시
+  if (splitMode) {
+    document.getElementById('sgL').textContent = nL;
+    document.getElementById('sgR').textContent = nR;
+    const total = G.me.l + G.me.r;
+    const valid = (nL + nR === total) && !(nL === G.me.l && nR === G.me.r) && nL <= 4 && nR <= 4;
+    document.getElementById('sgValid').textContent = valid ? '✅ 합계가 맞습니다!' : `합계 ${nL + nR} / 필요 ${total}`;
+    document.getElementById('sgOk').disabled = !valid;
+    document.getElementById('sgOk').style.opacity = valid ? 1 : 0.3;
+    return;
+  }
+
+  // 공격 감지: 손가락 끝이 공격 영역(상단 38%)에 진입
+  if (G.phase === 'my-turn' && gestReady && handDetected) {
+    const lInZone = lTipY < ATTACK_ZONE && foundLeft;
+    const rInZone = rTipY < ATTACK_ZONE && foundRight;
+
+    // 왼손 손가락이 공격 영역에 새로 진입
+    if (lInZone && !prevLeftInZone && G.me.l > 0) {
+      gestReady = false;
+      doAttack('l', lX);
+      setTimeout(() => { gestReady = true; }, COOL);
+    }
+    // 오른손 손가락이 공격 영역에 새로 진입
+    else if (rInZone && !prevRightInZone && G.me.r > 0) {
+      gestReady = false;
+      doAttack('r', rX);
+      setTimeout(() => { gestReady = true; }, COOL);
+    }
+
+    prevLeftInZone = lInZone;
+    prevRightInZone = rInZone;
+
+    // 양손 가까이 모으기 = 쪼개기 시도
+    if (leftHandClose && rightHandClose && canSplit() && foundLeft && foundRight) {
+      gestReady = false;
+      startSplit();
+      setTimeout(() => { gestReady = true; }, COOL);
+    }
+
+    // 타겟 영역 표시
+    document.getElementById('targetZone').classList.toggle('active', G.phase === 'my-turn');
+  } else {
+    prevLeftInZone = false;
+    prevRightInZone = false;
+  }
+}
+
+function drawHandGfx(lm, label, fCount) {
+  const w = cvs.width, h = cvs.height;
+  const tipIdx = [4, 8, 12, 16, 20];
+  const conns = [[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[5,9],[9,10],[10,11],[11,12],[9,13],[13,14],[14,15],[15,16],[13,17],[17,18],[18,19],[19,20],[0,17]];
+  const color = label === 'Right' ? '#ff6b35' : '#fbbf24'; // 미러
+  const colorA = label === 'Right' ? '#ff6b3555' : '#fbbf2455';
+
+  // 연결선
+  ctx.strokeStyle = colorA; ctx.lineWidth = 2;
+  conns.forEach(([a, b]) => {
+    ctx.beginPath();
+    ctx.moveTo((1 - lm[a].x) * w, lm[a].y * h);
+    ctx.lineTo((1 - lm[b].x) * w, lm[b].y * h);
+    ctx.stroke();
+  });
+
+  // 관절 점
+  tipIdx.forEach(ti => {
+    const t = lm[ti];
+    ctx.beginPath();
+    ctx.arc((1 - t.x) * w, t.y * h, 7, 0, Math.PI * 2);
+    ctx.fillStyle = color; ctx.fill();
+  });
+
+  // 손바닥 중앙에 카운트
+  const palm = lm[9];
+  ctx.font = '900 32px Outfit';
+  ctx.fillStyle = '#fff';
+  ctx.textAlign = 'center';
+  ctx.shadowColor = '#000'; ctx.shadowBlur = 10;
+  ctx.fillText(fCount, (1 - palm.x) * w, palm.y * h - 40);
+  ctx.shadowBlur = 0;
+
+  // 손가락 끝이 공격 영역에 있으면 강조
+  const tipMinY = Math.min(lm[4].y, lm[8].y, lm[12].y, lm[16].y, lm[20].y);
+  if (tipMinY < ATTACK_ZONE && G.phase === 'my-turn') {
+    ctx.beginPath();
+    ctx.arc((1 - palm.x) * w, palm.y * h, 55, 0, Math.PI * 2);
+    ctx.strokeStyle = '#ff6b3588'; ctx.lineWidth = 3; ctx.stroke();
+  }
+}
+
+// ═══ 공격 ═══
+function doAttack(myHand, handX) {
+  if (G.over || G.phase !== 'my-turn') return;
+  if (G.me[myHand] === 0) return;
+
+  // 어느 컴퓨터 손을 쳤는지: 손의 x좌표로 판단
+  const alive = [];
+  if (G.cpu.l > 0) alive.push('l');
+  if (G.cpu.r > 0) alive.push('r');
+
+  let target;
+  if (alive.length === 1) {
+    target = alive[0];
+  } else {
+    // 왼쪽(x<0.5)이면 컴퓨터 왼손, 오른쪽이면 오른손
+    target = handX < 0.5 ? 'l' : 'r';
+    if (!alive.includes(target)) target = alive[0];
+  }
+
+  execAtk(myHand, target);
+}
+
+function execAtk(mh, ch) {
+  const v = G.me[mh];
+  const oldCpu = G.cpu[ch];
+  const raw = G.cpu[ch] + v;
+  G.cpu[ch] = applyHit(raw);
+  const newCpu = G.cpu[ch];
+
+  // 사운드
+  if (newCpu === 0) sfxKill(); else sfxHit();
+
+  // 실황 메시지
+  const myHandName = mh === 'l' ? '왼손' : '오른손';
+  const cpuHandName = ch === 'l' ? '왼손' : '오른손';
+  let line2 = `${oldCpu} + ${v} = ${raw}`;
+  let line3 = '';
+  if (newCpu === 0) { line2 += ' → 💀 사망!'; line3 = '상대 손을 죽였습니다!'; }
+  showPlayMsg(`내 ${myHandName}(${v})으로 상대 ${cpuHandName}(${oldCpu})을 쳤다!`, line2, line3);
+
+  // 이펙트
+  const x = ch === 'l' ? '30%' : '70%';
+  showFx(x, '12%', '💥', 'clash-fx');
+
+  // 손가락 안내: 공격 후 내 손가락을 실제로 그 수만큼 펴야 한다는 안내
+  setTimeout(() => {
+    if (!G.over && G.me.l > 0) showFingerGuide('12%', '70%', `왼손 ${G.me.l}개`, 'var(--me)');
+    if (!G.over && G.me.r > 0) showFingerGuide('88%', '70%', `오른손 ${G.me.r}개`, 'var(--gold)');
+  }, 800);
+
+  turns++; render();
+
+  if (G.cpu.l === 0 && G.cpu.r === 0) {
+    G.over = true; render();
+    setTimeout(() => showRes('win'), 1200); return;
+  }
+
+  G.phase = 'cpu-turn'; render();
+  setTimeout(() => {
+    setSt('컴퓨터 생각 중...');
+    setTimeout(() => cpuTurn(), diff === 'easy' ? 900 : diff === 'medium' ? 1300 : 1600);
+  }, 1000);
+}
+
+function showFx(left, top, text, cls, color) {
+  const el = document.createElement('div');
+  el.className = cls;
+  el.style.left = left; el.style.top = top;
+  el.style.transform = 'translate(-50%,-50%)';
+  if (color) el.style.color = color;
+  el.textContent = text;
+  document.getElementById('gameScreen').appendChild(el);
+  setTimeout(() => el.remove(), 1000);
+}
+
+// 실황 메시지
+function showPlayMsg(line1, line2, line3, fast) {
+  const el = document.createElement('div');
+  el.className = 'play-msg' + (fast ? ' fast' : '');
+  el.innerHTML = `<div class="pm-line1">${line1}</div><div class="pm-line2">${line2}</div>${line3 ? `<div class="pm-line3">${line3}</div>` : ''}`;
+  document.getElementById('gameScreen').appendChild(el);
+  setTimeout(() => el.remove(), fast ? 1800 : 2500);
+}
+
+// CPU 공격 손 모션 (위에서 내려옴)
+function showCpuAtkMotion(leftPos, fingerCount) {
+  const el = document.createElement('div');
+  el.className = 'cpu-atk-hand';
+  el.style.left = leftPos;
+  el.style.top = '5%';
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 110 160');
+  svg.setAttribute('width', '130');
+  svg.setAttribute('height', '180');
+  drawCpuSvg(svg, fingerCount, false);
+  el.appendChild(svg);
+  document.getElementById('gameScreen').appendChild(el);
+  setTimeout(() => el.remove(), 1000);
+}
+
+// 손가락 안내 팝업
+function showFingerGuide(left, top, text, color) {
+  const el = document.createElement('div');
+  el.className = 'finger-guide';
+  el.style.left = left; el.style.top = top;
+  el.style.color = color;
+  el.textContent = text;
+  document.getElementById('gameScreen').appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+// ═══ 쪼개기 (제스처) ═══
+function canSplit() {
+  const t = G.me.l + G.me.r;
+  if (G.phase !== 'my-turn' || G.over || t <= 0 || t >= 5) return false;
+  for (let i = 0; i <= Math.min(t, 4); i++) {
+    const j = t - i; if (j < 0 || j > 4) continue;
+    if (i === G.me.l && j === G.me.r) continue;
+    return true;
+  }
+  return false;
+}
+
+function startSplit() {
+  if (!canSplit()) return;
+  if (gameMode === 'touch') {
+    openSplit();
+    return;
+  }
+  splitMode = true;
+  const total = G.me.l + G.me.r;
+  document.getElementById('sgTotal').textContent = total;
+  document.getElementById('splitGuide').classList.add('show');
+  setSt('손가락을 원하는 수만큼 펴세요');
+}
+
+function openSplit() {
+  if (!canSplit()) return;
+  const total = G.me.l + G.me.r;
+  // splitGuide를 슬라이더 모드로 전환
+  splitMode = true;
+  const sg = document.getElementById('splitGuide');
+  sg.classList.add('show');
+  document.getElementById('sgTotal').textContent = total;
+
+  // 터치 모드면 슬라이더 보여주기
+  if (gameMode === 'touch') {
+    // sgL, sgR을 버튼으로 조작 가능하게
+    document.getElementById('sgL').textContent = G.me.l;
+    document.getElementById('sgR').textContent = G.me.r;
+    document.getElementById('sgValid').textContent = '';
+    document.getElementById('sgOk').disabled = true;
+    document.getElementById('sgOk').style.opacity = '0.3';
+
+    // ← → 버튼 추가 (없으면)
+    if (!document.getElementById('sgLeftBtn')) {
+      const controls = document.createElement('div');
+      controls.id = 'sgControls';
+      controls.style.cssText = 'display:flex;gap:0.8rem;margin-top:0.8rem;';
+      controls.innerHTML = `
+        <button id="sgLeftBtn" style="font-size:1.5rem;padding:0.4rem 1rem;border:none;border-radius:8px;background:#ff6b3530;color:var(--me);cursor:pointer;" onclick="splitAdjust(-1)">◀ 왼손+</button>
+        <button id="sgRightBtn" style="font-size:1.5rem;padding:0.4rem 1rem;border:none;border-radius:8px;background:#fbbf2430;color:var(--gold);cursor:pointer;" onclick="splitAdjust(1)">오른손+ ▶</button>
+      `;
+      sg.querySelector('.sg-hands').after(controls);
+    }
+    splitTouchL = G.me.l;
+    splitTouchR = G.me.r;
+  }
+  setSt('쪼개기: 원하는 분배를 선택하세요');
+}
+
+let splitTouchL = 0, splitTouchR = 0;
+
+function splitAdjust(dir) {
+  const total = G.me.l + G.me.r;
+  if (dir === -1) { // 왼손 +1
+    splitTouchL = Math.min(splitTouchL + 1, Math.min(total, 4));
+    splitTouchR = total - splitTouchL;
+  } else { // 오른손 +1
+    splitTouchR = Math.min(splitTouchR + 1, Math.min(total, 4));
+    splitTouchL = total - splitTouchR;
+  }
+  if (splitTouchL < 0) splitTouchL = 0;
+  if (splitTouchR < 0) splitTouchR = 0;
+
+  document.getElementById('sgL').textContent = splitTouchL;
+  document.getElementById('sgR').textContent = splitTouchR;
+
+  const valid = (splitTouchL + splitTouchR === total) &&
+    !(splitTouchL === G.me.l && splitTouchR === G.me.r) &&
+    splitTouchL <= 4 && splitTouchR <= 4 &&
+    splitTouchL >= 0 && splitTouchR >= 0;
+  document.getElementById('sgValid').textContent = valid ? '✅ OK!' : '현재와 다르게 나눠주세요';
+  document.getElementById('sgOk').disabled = !valid;
+  document.getElementById('sgOk').style.opacity = valid ? '1' : '0.3';
+}
+
+function confirmSplit() {
+  const total = G.me.l + G.me.r;
+  let nL, nR;
+
+  if (gameMode === 'touch') {
+    nL = splitTouchL;
+    nR = splitTouchR;
+  } else {
+    nL = curL;
+    nR = curR;
+  }
+
+  if (nL + nR !== total || (nL === G.me.l && nR === G.me.r) || nL > 4 || nR > 4) return;
+  G.me.l = nL; G.me.r = nR;
+  splitMode = false;
+  document.getElementById('splitGuide').classList.remove('show');
+  showPlayMsg('쪼개기!', `${nL} / ${nR}`, '', true);
+  sfxSplit();
+  turns++;
+  G.phase = 'cpu-turn'; render();
+  setSt('컴퓨터 생각 중...');
+  setTimeout(() => cpuTurn(), diff === 'easy' ? 900 : diff === 'medium' ? 1300 : 1600);
+}
+
+function cancelSplit() {
+  splitMode = false;
+  document.getElementById('splitGuide').classList.remove('show');
+  setSt(gameMode==='touch'?'내 손을 터치해서 공격하세요 👆':'손을 올려서 공격하세요 👆');
+}
+
+// ═══ CPU ═══
+function cpuTurn() {
+  if (G.over) return;
+  const moves = [];
+  ['l', 'r'].forEach(a => { if (G.cpu[a] === 0) return; ['l', 'r'].forEach(d => { if (G.me[d] === 0) return; moves.push({ type: 'atk', a, d, raw: G.cpu[a] + G.me[d], res: applyHit(G.cpu[a] + G.me[d]) }); }); });
+  const splits = cpuSp();
+  const all = [...moves, ...splits];
+  if (!all.length) { G.phase = 'my-turn'; render(); setSt(gameMode==='touch'?'내 손을 터치해서 공격하세요 👆':'손을 올려서 공격하세요 👆'); return; }
+
+  let ch;
+  if (diff === 'easy') ch = all[Math.floor(Math.random() * all.length)];
+  else if (diff === 'medium') ch = cpuMed(moves, splits);
+  else ch = cpuHd(moves, splits);
+
+  if (ch.type === 'split') {
+    const oldL = G.cpu.l, oldR = G.cpu.r;
+    G.cpu.l = ch.nl; G.cpu.r = ch.nr; turns++; render();
+    showPlayMsg('컴퓨터가 쪼갰습니다!', `${oldL},${oldR} → ${ch.nl},${ch.nr}`, '');
+    setSt('컴퓨터가 쪼갰습니다 ✌️');
+    setTimeout(() => { G.phase = 'my-turn'; render(); setSt(gameMode==='touch'?'내 손을 터치해서 공격하세요 👆':'손을 올려서 공격하세요 👆'); }, 1200);
+  } else {
+    const cpuHandName = ch.a === 'l' ? '왼손' : '오른손';
+    const myHandName = ch.d === 'l' ? '왼손' : '오른손';
+    const cpuVal = G.cpu[ch.a];
+    const myOld = G.me[ch.d];
+    setSt(`⚠️ 컴퓨터 ${cpuHandName}(${cpuVal})이 내 ${myHandName}(${myOld})을 노린다!`);
+
+    // 상단의 실제 CPU 손 SVG 자체를 내려보내는 애니메이션
+    const cpuHandEl = document.getElementById(ch.a === 'l' ? 'cpuLWrap' : 'cpuRWrap');
+    cpuHandEl.style.transition = 'transform 0.5s ease-in';
+    cpuHandEl.style.transform = 'translateY(250px) scale(1.15)';
+    cpuHandEl.style.zIndex = '36';
+
+    // 모션이 내려와서 치는 시점
+    setTimeout(() => {
+      // 💥 이펙트
+      const hitX = ch.d === 'l' ? '25%' : '75%';
+      const hitY = gameMode === 'touch' ? '60%' : '65%';
+      showFx(hitX, hitY, '💥', 'clash-fx');
+
+      // 바운스
+      cpuHandEl.style.transition = 'transform 0.15s ease-out';
+      cpuHandEl.style.transform = 'translateY(230px) scale(1.1)';
+
+      const raw = cpuVal + myOld;
+      G.me[ch.d] = applyHit(raw);
+      const newVal = G.me[ch.d];
+
+      // 사운드
+      if (newVal === 0) sfxKill(); else sfxHit();
+
+      // 실황 메시지
+      let line2 = `${myOld} + ${cpuVal} = ${raw}`;
+      let line3 = '';
+      if (newVal === 0) { line2 += ' → 💀 사망!'; line3 = '내 손이 죽었습니다!'; }
+      showPlayMsg(`컴퓨터 ${cpuHandName}(${cpuVal})이 내 ${myHandName}(${myOld})을 쳤다!`, line2, line3);
+
+      turns++; render();
+
+      // 손 되돌리기
+      setTimeout(() => {
+        cpuHandEl.style.transition = 'transform 0.4s ease-out';
+        cpuHandEl.style.transform = 'translateY(0) scale(1)';
+        cpuHandEl.style.zIndex = '';
+      }, 400);
+
+      // 손가락 안내
+      setTimeout(() => {
+        if (!G.over && G.me.l > 0) showFingerGuide('12%', '70%', `왼손 ${G.me.l}개 펴세요`, 'var(--me)');
+        if (!G.over && G.me.r > 0) showFingerGuide('88%', '70%', `오른손 ${G.me.r}개 펴세요`, 'var(--gold)');
+      }, 800);
+
+      if (G.me.l === 0 && G.me.r === 0) { G.over = true; render(); setTimeout(() => showRes('lose'), 1200); return; }
+      setTimeout(() => {
+        G.phase = 'my-turn'; render(); setSt(gameMode==='touch'?'내 손을 터치해서 공격하세요 👆':'손을 올려서 공격하세요 👆');
+      }, 2000);
+    }, 500);
+  }
+}
+
+function cpuSp() { const t = G.cpu.l + G.cpu.r; if (t <= 0 || t >= 5) return []; const s = []; for (let i = 0; i <= Math.min(t, 4); i++) { const j = t - i; if (j < 0 || j > 4 || (i === G.cpu.l && j === G.cpu.r)) continue; s.push({ type: 'split', nl: i, nr: j }); } return s; }
+function cpuMed(m, s) { const k = m.filter(x => x.res === 0); if (k.length) return k[Math.floor(Math.random() * k.length)]; if ((G.cpu.l === 0 || G.cpu.r === 0) && s.length) return s[Math.floor(Math.random() * s.length)]; return m.length ? m[Math.floor(Math.random() * m.length)] : s[0]; }
+function cpuHd(m, s) { const all = [...m, ...s]; let best = -999, pick = all[0]; for (const mv of all) { const sc = evM(mv); if (sc > best) { best = sc; pick = mv; } } return pick; }
+function evM(m) { const sim = { me: { ...G.me }, cpu: { ...G.cpu } }; if (m.type === 'atk') sim.me[m.d] = applyHit(sim.cpu[m.a] + sim.me[m.d]); else { sim.cpu.l = m.nl; sim.cpu.r = m.nr; } let s = 0; if (sim.me.l === 0 && sim.me.r === 0) return 1000; if (sim.me.l === 0 || sim.me.r === 0) s += 30; if (m.type === 'atk') { if (m.res === 0) s += 50; else s += m.raw * 2; } if (m.type === 'split' && (G.cpu.l === 0 || G.cpu.r === 0)) s += 40; s += Math.random() * 3; return s; }
+
+// ═══ 렌더 ═══
+function render() {
+  drawCpuSvg(document.getElementById('svgCL'), G.cpu.l, G.cpu.l === 0);
+  drawCpuSvg(document.getElementById('svgCR'), G.cpu.r, G.cpu.r === 0);
+  document.getElementById('cpuLC').textContent = G.cpu.l;
+  document.getElementById('cpuRC').textContent = G.cpu.r;
+  document.getElementById('cpuLC').style.color = G.cpu.l === 0 ? '#ef4444' : '#2dd4a8';
+  document.getElementById('cpuRC').style.color = G.cpu.r === 0 ? '#ef4444' : '#2dd4a8';
+  document.getElementById('myLC').textContent = G.me.l;
+  document.getElementById('myRC').textContent = G.me.r;
+  document.getElementById('myLC').style.opacity = G.me.l === 0 ? 0.2 : 1;
+  document.getElementById('myRC').style.opacity = G.me.r === 0 ? 0.2 : 1;
+  document.getElementById('sMe').textContent = scores.me;
+  document.getElementById('sCpu').textContent = scores.cpu;
+  document.getElementById('targetZone').classList.toggle('active', G.phase === 'my-turn' && !G.over && gameMode === 'cam');
+  renderTouch();
+}
+function setSt(t) { document.getElementById('stBar').innerHTML = t; }
+
+// ═══ 결과 ═══
+function showRes(r) {
+  const t = document.getElementById('rT'), s = document.getElementById('rS'), st = document.getElementById('rSt');
+  if (r === 'win') { scores.me++; t.innerHTML = '🎉 승리!'; t.style.color = '#fbbf24'; s.textContent = { easy: '하수를 이겼습니다. 당연한 거 아닌가요?', medium: '중수를 꺾었습니다. 제법인데요?', hard: '고수를 이겼습니다. 진짜 고수는 당신이었습니다.' }[diff]; mkC(); sfxWin(); }
+  else { scores.cpu++; t.innerHTML = '💀 패배...'; t.style.color = '#ef4444'; s.textContent = { easy: '하수한테 졌습니다. ...괜찮으세요?', medium: '중수의 실력을 보여드렸습니다.', hard: '고수는 자비가 없습니다.' }[diff]; sfxLose(); }
+  st.textContent = `전적 ${scores.me}승 ${scores.cpu}패 | ${turns}턴`; render(); document.getElementById('resOv').classList.add('show');
+}
+function mkC() { const cs = ['#ff6b35', '#2dd4a8', '#fbbf24', '#8b5cf6', '#f472b6']; for (let i = 0; i < 50; i++) { const c = document.createElement('div'); c.className = 'conf'; c.style.left = Math.random() * 100 + 'vw'; c.style.top = '-10px'; c.style.background = cs[Math.floor(Math.random() * cs.length)]; c.style.animationDelay = Math.random() * 2 + 's'; c.style.width = (5 + Math.random() * 8) + 'px'; c.style.height = (5 + Math.random() * 8) + 'px'; document.body.appendChild(c); setTimeout(() => c.remove(), 5000); } }
+
+// ═══ 관리 ═══
+function resetRound() {
+  G = { me: { l: 1, r: 1 }, cpu: { l: 1, r: 1 }, phase: 'my-turn', over: false };
+  turns = 0; gestReady = true; handDetected = false; splitMode = false;
+  prevLeftInZone = false; prevRightInZone = false;
+  document.getElementById('handGuide').classList.remove('hidden');
+  document.getElementById('splitGuide').classList.remove('show');
+  render();
+  if (gameMode === 'touch') {
+    document.getElementById('handGuide').classList.add('hidden');
+    setSt('내 손을 터치해서 공격하세요 👆');
+  } else {
+    setSt('손을 들어주세요 ✋');
+  }
+}
+function rematch() { document.getElementById('resOv').classList.remove('show'); resetRound(); }
+function goMenu() { document.getElementById('gameScreen').style.display = 'none'; document.getElementById('resOv').classList.remove('show'); document.getElementById('diffScreen').classList.add('show'); }
+
+// 키보드 폴백
+document.addEventListener('keydown', e => {
+  if (G.over || G.phase !== 'my-turn') return;
+  if (e.key === 'q') doAttack('l', 0.3);
+  else if (e.key === 'w') doAttack('r', 0.7);
+  else if (e.key === 's') { if (canSplit()) startSplit(); }
+});
+
+// ═══ 초기화 ═══
+function skipTut() { document.getElementById('tutorial').classList.add('hidden'); document.getElementById('diffScreen').classList.add('show'); }
+function toggleHelp() { document.getElementById('helpPanel').classList.toggle('show'); }
+
+function toggleShare() { document.getElementById('shareModal').classList.toggle('show'); document.getElementById('shareCopied').style.display = 'none'; }
+
+function getShareUrl() { return window.location.href; }
+function getShareText() {
+  const scoreText = scores.me + scores.cpu > 0 ? ` (전적: ${scores.me}승 ${scores.cpu}패)` : '';
+  return `🥢 젓가락 게임${scoreText} - 무쓸모 뚝딱 프로그램 by KKAEBI`;
+}
+
+function shareKakao() {
+  const url = `https://story.kakao.com/share?url=${encodeURIComponent(getShareUrl())}`;
+  window.open(url, '_blank');
+}
+function shareTwitter() {
+  const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(getShareText())}&url=${encodeURIComponent(getShareUrl())}`;
+  window.open(url, '_blank');
+}
+function shareFacebook() {
+  const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(getShareUrl())}`;
+  window.open(url, '_blank');
+}
+function shareLine() {
+  const url = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(getShareUrl())}&text=${encodeURIComponent(getShareText())}`;
+  window.open(url, '_blank');
+}
+function shareCopy() {
+  navigator.clipboard.writeText(getShareUrl()).then(() => {
+    document.getElementById('shareCopied').style.display = 'block';
+    setTimeout(() => { document.getElementById('shareCopied').style.display = 'none'; }, 2000);
+  }).catch(() => {
+    // 폴백
+    const ta = document.createElement('textarea');
+    ta.value = getShareUrl();
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    document.getElementById('shareCopied').style.display = 'block';
+    setTimeout(() => { document.getElementById('shareCopied').style.display = 'none'; }, 2000);
+  });
+}
+
+let gameMode = null; // 'cam' or 'touch'
+
+function pDiff(d) {
+  diff = d;
+  ['d-easy','d-medium','d-hard'].forEach(id => document.getElementById(id).classList.remove('sel'));
+  document.getElementById('d-' + d).classList.add('sel');
+  checkReady();
+}
+
+function pMode(m) {
+  gameMode = m;
+  ['m-cam','m-touch'].forEach(id => document.getElementById(id).classList.remove('sel'));
+  document.getElementById('m-' + m).classList.add('sel');
+  checkReady();
+}
+
+function checkReady() {
+  const b = document.getElementById('dGoBtn');
+  if (diff && gameMode) {
+    b.disabled = false;
+    const dn = { easy: '하수', medium: '중수', hard: '고수' };
+    const mn = { cam: '📷 카메라', touch: '👆 터치' };
+    b.textContent = `${dn[diff]} + ${mn[gameMode]}으로 시작!`;
+  }
+}
+
+function launch() {
+  document.getElementById('diffScreen').classList.remove('show');
+  document.getElementById('gDf').textContent = { easy: '😴 하수', medium: '🤔 중수', hard: '😈 고수' }[diff];
+
+  if (gameMode === 'cam') {
+    initCam();
+  } else {
+    initTouchMode();
+  }
+}
+
+// ═══ 터치 모드 ═══
+function initTouchMode() {
+  htOn = false;
+  document.getElementById('camFull').style.display = 'none';
+  document.getElementById('overlay').style.display = 'none';
+
+  // 배경 (중복 방지)
+  if (!document.getElementById('touchBg')) {
+    const bg = document.createElement('div');
+    bg.className = 'touch-bg';
+    bg.id = 'touchBg';
+    document.getElementById('gameScreen').insertBefore(bg, document.getElementById('gameScreen').firstChild);
+  }
+
+  // 내 손 SVG 표시
+  document.getElementById('myHandsTouch').style.display = 'flex';
+
+  // 쪼개기 버튼 (중복 방지)
+  if (!document.getElementById('touchSpBtn')) {
+    const spBtn = document.createElement('button');
+    spBtn.className = 'touch-split-btn';
+    spBtn.id = 'touchSpBtn';
+    spBtn.textContent = '👏 양손 부딪혀 쪼개기';
+    spBtn.onclick = () => {
+      if (canSplit()) {
+        openSplit();
+      }
+    };
+    document.getElementById('gameScreen').appendChild(spBtn);
+  }
+
+  document.getElementById('handGuide').classList.add('hidden');
+  document.getElementById('gameScreen').style.display = 'block';
+  resetRound();
+  setSt('내 손을 터치해서 공격하세요 👆');
+}
+
+// 내 손 SVG 그리기 (파란색 톤으로 구분)
+function drawMyHandSvg(svg, count, dead) {
+  const skin = '#64B5F6';
+  const skinDark = '#42A5F5';
+  const skinLight = '#90CAF9';
+  const nail = '#BBDEFB';
+  const shadow = '#1E88E5';
+  const outline = '#1976D2';
+
+  if (dead) {
+    svg.innerHTML = `
+      <ellipse cx="55" cy="45" rx="40" ry="38" fill="#333" stroke="#444" stroke-width="2"/>
+      <text x="55" y="48" text-anchor="middle" fill="#ef4444" font-size="40">💀</text>`;
+    return;
+  }
+
+  let h = '';
+  h += `<rect x="30" y="0" width="50" height="24" rx="12" fill="${skin}" stroke="${outline}" stroke-width="1.5"/>`;
+  h += `<rect x="14" y="14" width="82" height="74" rx="24" fill="${skin}" stroke="${outline}" stroke-width="2"/>`;
+  h += `<ellipse cx="55" cy="40" rx="30" ry="20" fill="${skinLight}" opacity="0.3"/>`;
+  h += `<ellipse cx="12" cy="44" rx="14" ry="22" fill="${skin}" stroke="${outline}" stroke-width="1.5" transform="rotate(10, 12, 44)"/>`;
+  h += `<ellipse cx="8" cy="62" rx="8" ry="6" fill="${nail}" stroke="${skinDark}" stroke-width="0.5"/>`;
+
+  const fingers = [
+    { cx: 30, w: 18, maxH: 62 },
+    { cx: 50, w: 19, maxH: 72 },
+    { cx: 70, w: 18, maxH: 62 },
+    { cx: 88, w: 16, maxH: 50 },
+  ];
+
+  const patterns = { 0: [], 1: [0], 2: [0,1], 3: [0,1,2], 4: [0,1,2,3] };
+  const active = patterns[Math.min(count, 4)] || [];
+
+  fingers.forEach((f, i) => {
+    const isDown = active.includes(i);
+    const startY = 80;
+    const r = f.w / 2;
+    if (isDown) {
+      const len = f.maxH;
+      h += `<rect x="${f.cx - r + 2}" y="${startY + 3}" width="${f.w}" height="${len}" rx="${r}" fill="${shadow}" opacity="0.2"/>`;
+      h += `<rect x="${f.cx - r}" y="${startY}" width="${f.w}" height="${len}" rx="${r}" fill="${skin}" stroke="${outline}" stroke-width="1.5"/>`;
+      h += `<rect x="${f.cx - r + 3}" y="${startY + 8}" width="5" height="${len - 28}" rx="2.5" fill="${skinLight}" opacity="0.45"/>`;
+      h += `<line x1="${f.cx - r + 4}" y1="${startY + 18}" x2="${f.cx + r - 4}" y2="${startY + 18}" stroke="${skinDark}" stroke-width="1.2" opacity="0.35" stroke-linecap="round"/>`;
+      h += `<line x1="${f.cx - r + 4}" y1="${startY + 35}" x2="${f.cx + r - 4}" y2="${startY + 35}" stroke="${skinDark}" stroke-width="1.2" opacity="0.35" stroke-linecap="round"/>`;
+      h += `<rect x="${f.cx - r + 3}" y="${startY + len - 18}" width="${f.w - 6}" height="18" rx="${(f.w - 6) / 2}" fill="${nail}" stroke="${skinDark}" stroke-width="0.5"/>`;
+      h += `<rect x="${f.cx - r + 5}" y="${startY + len - 15}" width="${f.w - 10}" height="6" rx="3" fill="#fff" opacity="0.5"/>`;
+    } else {
+      h += `<ellipse cx="${f.cx}" cy="${startY + 8}" rx="${r - 1}" ry="9" fill="${skinDark}" stroke="${shadow}" stroke-width="0.8" opacity="0.5"/>`;
+    }
+  });
+  svg.innerHTML = h;
+}
+
+let touchAtkHand = null;
+
+function touchAtk(hand) {
+  if (G.over || G.phase !== 'my-turn') return;
+  if (G.me[hand] === 0) return;
+
+  touchAtkHand = hand;
+
+  // 선택한 손 표시
+  document.getElementById('myLBox').classList.toggle('selected-hand', hand === 'l');
+  document.getElementById('myRBox').classList.toggle('selected-hand', hand === 'r');
+
+  // 상대 살아있는 손 확인
+  const alive = [];
+  if (G.cpu.l > 0) alive.push('l');
+  if (G.cpu.r > 0) alive.push('r');
+
+  if (alive.length === 1) {
+    execAtk(hand, alive[0]);
+    document.getElementById('myLBox').classList.remove('selected-hand');
+    document.getElementById('myRBox').classList.remove('selected-hand');
+  } else {
+    document.getElementById('touchTarget').style.display = 'flex';
+  }
+}
+
+function touchTargetSel(cpuHand) {
+  document.getElementById('touchTarget').style.display = 'none';
+  document.getElementById('myLBox').classList.remove('selected-hand');
+  document.getElementById('myRBox').classList.remove('selected-hand');
+  execAtk(touchAtkHand, cpuHand);
+}
+
+function touchTargetCancel() {
+  document.getElementById('touchTarget').style.display = 'none';
+  document.getElementById('myLBox').classList.remove('selected-hand');
+  document.getElementById('myRBox').classList.remove('selected-hand');
+  touchAtkHand = null;
+}
+
+// 터치 모드 렌더 추가
+function renderTouch() {
+  if (!gameMode || gameMode !== 'touch') return;
+  const ml = document.getElementById('svgML');
+  const mr = document.getElementById('svgMR');
+  if (!ml || !mr) return;
+
+  drawMyHandSvg(ml, G.me.l, G.me.l === 0);
+  drawMyHandSvg(mr, G.me.r, G.me.r === 0);
+  document.getElementById('myLCt').textContent = G.me.l;
+  document.getElementById('myRCt').textContent = G.me.r;
+  document.getElementById('myLBox').classList.toggle('dead-hand', G.me.l === 0);
+  document.getElementById('myRBox').classList.toggle('dead-hand', G.me.r === 0);
+
+  const spBtn = document.getElementById('touchSpBtn');
+  if (spBtn) spBtn.disabled = !canSplit();
+}
+</script>
 </body>
 </html>
