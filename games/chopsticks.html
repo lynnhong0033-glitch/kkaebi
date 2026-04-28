@@ -244,6 +244,21 @@
   .my-hw.dead-hand{opacity:0.2;pointer-events:none;}
   .my-hw.selected-hand{transform:scale(1.1);filter:drop-shadow(0 0 12px var(--me));}
 
+  /* 드래그 가능한 내 손 */
+  .my-hw.dragging{z-index:20;transition:none !important;opacity:0.9;}
+  .my-hw.drag-ready{cursor:grab;}
+  .my-hw.drag-ready:active{cursor:grabbing;}
+
+  /* 쪼개기 감지 표시 */
+  .split-detected{
+    position:absolute;z-index:25;pointer-events:none;
+    left:50%;bottom:220px;transform:translateX(-50%);
+    font-family:'Black Han Sans';font-size:1.2rem;color:var(--gold);
+    background:#000000aa;padding:0.4rem 1rem;border-radius:10px;
+    animation:splitPulse 0.8s infinite;
+  }
+  @keyframes splitPulse{0%,100%{opacity:0.7;transform:translateX(-50%) scale(1);}50%{opacity:1;transform:translateX(-50%) scale(1.05);}}
+
   /* 터치 모드: 상대 손 선택 */
   .touch-target{
     position:absolute;inset:0;z-index:50;
@@ -411,13 +426,13 @@
   <div class="my-info my-info-l"><div class="my-num" id="myLC">1</div><div class="my-lbl">왼손</div></div>
   <div class="my-info my-info-r"><div class="my-num" id="myRC">1</div><div class="my-lbl">오른손</div></div>
 
-  <!-- 터치 모드: 내 손 SVG (하단) -->
+  <!-- 터치 모드: 내 손 SVG (하단, 드래그 가능) -->
   <div class="my-hands-touch" id="myHandsTouch" style="display:none;">
-    <div class="my-hw" id="myLBox" onclick="touchAtk('l')">
+    <div class="my-hw" id="myLBox">
       <svg class="my-hand-svg" id="svgML" viewBox="0 0 110 160"></svg>
       <div class="my-fc" id="myLCt">1</div>
     </div>
-    <div class="my-hw" id="myRBox" onclick="touchAtk('r')">
+    <div class="my-hw" id="myRBox">
       <svg class="my-hand-svg" id="svgMR" viewBox="0 0 110 160"></svg>
       <div class="my-fc" id="myRCt">1</div>
     </div>
@@ -1398,24 +1413,114 @@ function initTouchMode() {
   // 내 손 SVG 표시
   document.getElementById('myHandsTouch').style.display = 'flex';
 
-  // 쪼개기 버튼 (중복 방지)
-  if (!document.getElementById('touchSpBtn')) {
-    const spBtn = document.createElement('button');
-    spBtn.className = 'touch-split-btn';
-    spBtn.id = 'touchSpBtn';
-    spBtn.textContent = '👏 양손 부딪혀 쪼개기';
-    spBtn.onclick = () => {
-      if (canSplit()) {
-        openSplit();
-      }
-    };
-    document.getElementById('gameScreen').appendChild(spBtn);
-  }
-
   document.getElementById('handGuide').classList.add('hidden');
   document.getElementById('gameScreen').style.display = 'block';
   resetRound();
   setSt('내 손을 터치해서 공격하세요 👆');
+  initTouchDrag();
+}
+
+// ═══ 터치 드래그 시스템 (탭=공격, 드래그해서 양손 가까이=쪼개기) ═══
+let dragState = { active: false, hand: null, startX: 0, startY: 0, moved: false };
+let lBoxPos = { x: 0, ox: 0 };
+let rBoxPos = { x: 0, ox: 0 };
+let splitIndicator = null;
+
+function initTouchDrag() {
+  const lBox = document.getElementById('myLBox');
+  const rBox = document.getElementById('myRBox');
+  if (!lBox || !rBox) return;
+
+  lBox.classList.add('drag-ready');
+  rBox.classList.add('drag-ready');
+
+  // 포인터 이벤트 (마우스 + 터치 통합)
+  [['myLBox', 'l'], ['myRBox', 'r']].forEach(([id, hand]) => {
+    const el = document.getElementById(id);
+
+    el.addEventListener('pointerdown', (e) => {
+      if (G.over || G.phase !== 'my-turn') return;
+      e.preventDefault();
+      dragState = { active: true, hand, startX: e.clientX, startY: e.clientY, moved: false };
+      el.classList.add('dragging');
+      el.setPointerCapture(e.pointerId);
+    });
+
+    el.addEventListener('pointermove', (e) => {
+      if (!dragState.active || dragState.hand !== hand) return;
+      const dx = e.clientX - dragState.startX;
+      const dy = e.clientY - dragState.startY;
+
+      // 10px 이상 움직이면 드래그로 판정
+      if (Math.abs(dx) > 10 || Math.abs(dy) > 10) dragState.moved = true;
+
+      if (dragState.moved) {
+        el.style.transform = `translate(${dx}px, ${dy}px)`;
+        checkSplitProximity();
+      }
+    });
+
+    el.addEventListener('pointerup', (e) => {
+      if (!dragState.active || dragState.hand !== hand) return;
+      el.classList.remove('dragging');
+
+      if (!dragState.moved) {
+        // 탭 = 공격
+        el.style.transform = '';
+        touchAtk(hand);
+      } else {
+        // 드래그 끝 — 쪼개기 체크
+        if (isSplitClose()) {
+          // 양손이 가까이 왔으면 쪼개기!
+          el.style.transform = '';
+          removeSplitIndicator();
+          if (canSplit()) openSplit();
+        } else {
+          el.style.transform = '';
+        }
+        removeSplitIndicator();
+      }
+
+      dragState = { active: false, hand: null, startX: 0, startY: 0, moved: false };
+    });
+
+    el.addEventListener('pointercancel', () => {
+      el.classList.remove('dragging');
+      el.style.transform = '';
+      dragState = { active: false, hand: null, startX: 0, startY: 0, moved: false };
+      removeSplitIndicator();
+    });
+  });
+}
+
+function checkSplitProximity() {
+  if (!canSplit()) return;
+  if (isSplitClose()) {
+    if (!splitIndicator) {
+      splitIndicator = document.createElement('div');
+      splitIndicator.className = 'split-detected';
+      splitIndicator.textContent = '👏 놓으면 쪼개기!';
+      document.getElementById('gameScreen').appendChild(splitIndicator);
+    }
+  } else {
+    removeSplitIndicator();
+  }
+}
+
+function isSplitClose() {
+  const lBox = document.getElementById('myLBox');
+  const rBox = document.getElementById('myRBox');
+  if (!lBox || !rBox) return false;
+  const lRect = lBox.getBoundingClientRect();
+  const rRect = rBox.getBoundingClientRect();
+  const lCenter = lRect.left + lRect.width / 2;
+  const rCenter = rRect.left + rRect.width / 2;
+  const dist = Math.abs(lCenter - rCenter);
+  return dist < 100; // 100px 이내면 가까이 온 것
+}
+
+function removeSplitIndicator() {
+  if (splitIndicator) { splitIndicator.remove(); splitIndicator = null; }
 }
 
 // 내 손 SVG 그리기 (파란색 톤으로 구분)
@@ -1524,9 +1629,6 @@ function renderTouch() {
   document.getElementById('myRCt').textContent = G.me.r;
   document.getElementById('myLBox').classList.toggle('dead-hand', G.me.l === 0);
   document.getElementById('myRBox').classList.toggle('dead-hand', G.me.r === 0);
-
-  const spBtn = document.getElementById('touchSpBtn');
-  if (spBtn) spBtn.disabled = !canSplit();
 }
 </script>
 </body>
