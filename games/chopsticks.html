@@ -883,14 +883,13 @@ function onHR(res) {
     document.getElementById('sgL').textContent = nL;
     document.getElementById('sgR').textContent = nR;
     const total = G.me.l + G.me.r;
-    const valid = (nL + nR === total) && !(nL === G.me.l && nR === G.me.r) && nL <= 4 && nR <= 4;
-    document.getElementById('sgValid').textContent = valid ? '✅ 합계 맞음! 유지하세요...' : `합계 ${nL + nR} / 필요 ${total}`;
+    const valid = (nL + nR === total) && !(nL === G.me.l && nR === G.me.r) && !(nL === G.me.r && nR === G.me.l) && nL <= 4 && nR <= 4;
+    document.getElementById('sgValid').textContent = valid ? '✅ 합계 맞음! 유지하세요...' : (nL + nR === total && (nL === G.me.r && nR === G.me.l)) ? '좌우만 바꾸는 건 안 돼요!' : `합계 ${nL + nR} / 필요 ${total}`;
 
     if (valid && !splitAutoTimer) {
       splitAutoTimer = setTimeout(() => {
         if (splitMode) {
-          // 다시 한번 체크
-          const stillValid = (curL + curR === total) && !(curL === G.me.l && curR === G.me.r);
+          const stillValid = (curL + curR === total) && !(curL === G.me.l && curR === G.me.r) && !(curL === G.me.r && curR === G.me.l);
           if (stillValid) confirmSplit();
         }
         splitAutoTimer = null;
@@ -1097,7 +1096,8 @@ function canSplit() {
   if (G.phase !== 'my-turn' || G.over || t <= 0 || t >= 5) return false;
   for (let i = 0; i <= Math.min(t, 4); i++) {
     const j = t - i; if (j < 0 || j > 4) continue;
-    if (i === G.me.l && j === G.me.r) continue;
+    if (i === G.me.l && j === G.me.r) continue; // 현재와 같음
+    if (i === G.me.r && j === G.me.l) continue; // 좌우 뒤집기 = 의미 없음
     return true;
   }
   return false;
@@ -1165,9 +1165,10 @@ function splitAdjust(dir) {
 
   const valid = (splitTouchL + splitTouchR === total) &&
     !(splitTouchL === G.me.l && splitTouchR === G.me.r) &&
+    !(splitTouchL === G.me.r && splitTouchR === G.me.l) &&
     splitTouchL <= 4 && splitTouchR <= 4 &&
     splitTouchL >= 0 && splitTouchR >= 0;
-  document.getElementById('sgValid').textContent = valid ? '✅ 1초 후 자동 실행!' : '현재와 다르게 나눠주세요';
+  document.getElementById('sgValid').textContent = valid ? '✅ 1초 후 자동 실행!' : (splitTouchL === G.me.r && splitTouchR === G.me.l) ? '좌우만 바꾸는 건 안 돼요!' : '현재와 다르게 나눠주세요';
 
   if (valid) {
     if (splitAutoTimer) clearTimeout(splitAutoTimer);
@@ -1192,7 +1193,7 @@ function confirmSplit() {
     nR = curR;
   }
 
-  if (nL + nR !== total || (nL === G.me.l && nR === G.me.r) || nL > 4 || nR > 4) return;
+  if (nL + nR !== total || (nL === G.me.l && nR === G.me.r) || (nL === G.me.r && nR === G.me.l) || nL > 4 || nR > 4) return;
   G.me.l = nL; G.me.r = nR;
   splitMode = false;
   document.getElementById('splitGuide').classList.remove('show');
@@ -1291,10 +1292,55 @@ function cpuTurn() {
   }
 }
 
-function cpuSp() { const t = G.cpu.l + G.cpu.r; if (t <= 0 || t >= 5) return []; const s = []; for (let i = 0; i <= Math.min(t, 4); i++) { const j = t - i; if (j < 0 || j > 4 || (i === G.cpu.l && j === G.cpu.r)) continue; s.push({ type: 'split', nl: i, nr: j }); } return s; }
-function cpuMed(m, s) { const k = m.filter(x => x.res === 0); if (k.length) return k[Math.floor(Math.random() * k.length)]; if ((G.cpu.l === 0 || G.cpu.r === 0) && s.length) return s[Math.floor(Math.random() * s.length)]; return m.length ? m[Math.floor(Math.random() * m.length)] : s[0]; }
+function cpuSp() { const t = G.cpu.l + G.cpu.r; if (t <= 0 || t >= 5) return []; const s = []; for (let i = 0; i <= Math.min(t, 4); i++) { const j = t - i; if (j < 0 || j > 4 || (i === G.cpu.l && j === G.cpu.r) || (i === G.cpu.r && j === G.cpu.l)) continue; s.push({ type: 'split', nl: i, nr: j }); } return s; }
+function cpuMed(m, s) {
+  const k = m.filter(x => x.res === 0);
+  if (k.length) return k[Math.floor(Math.random() * k.length)];
+  if ((G.cpu.l === 0 || G.cpu.r === 0) && s.length) return s[Math.floor(Math.random() * s.length)];
+  return m.length ? m[Math.floor(Math.random() * m.length)] : s[0];
+}
 function cpuHd(m, s) { const all = [...m, ...s]; let best = -999, pick = all[0]; for (const mv of all) { const sc = evM(mv); if (sc > best) { best = sc; pick = mv; } } return pick; }
-function evM(m) { const sim = { me: { ...G.me }, cpu: { ...G.cpu } }; if (m.type === 'atk') sim.me[m.d] = applyHit(sim.cpu[m.a] + sim.me[m.d]); else { sim.cpu.l = m.nl; sim.cpu.r = m.nr; } let s = 0; if (sim.me.l === 0 && sim.me.r === 0) return 1000; if (sim.me.l === 0 || sim.me.r === 0) s += 30; if (m.type === 'atk') { if (m.res === 0) s += 50; else s += m.raw * 2; } if (m.type === 'split' && (G.cpu.l === 0 || G.cpu.r === 0)) s += 40; s += Math.random() * 3; return s; }
+function evM(m) {
+  const sim = { me: { ...G.me }, cpu: { ...G.cpu } };
+  if (m.type === 'atk') sim.me[m.d] = applyHit(sim.cpu[m.a] + sim.me[m.d]);
+  else { sim.cpu.l = m.nl; sim.cpu.r = m.nr; }
+  let s = 0;
+  if (sim.me.l === 0 && sim.me.r === 0) return 1000;
+  if (m.type === 'atk') {
+    if (m.res === 0) s += 50;
+    else if (sim.me[m.d] === 4) s += 25; // 4로 만들기 = 다음에 1로 킬 가능
+    else s += m.raw * 2;
+    if (sim.me.l === 0 || sim.me.r === 0) s += 30;
+  }
+  if (m.type === 'split') {
+    if (G.cpu.l === 0 || G.cpu.r === 0) s += 45; // 부활 = 최우선
+    else {
+      // 전략적 쪼개기 평가: 쪼갠 후 킬 가능성 체크
+      let killChance = 0;
+      ['l','r'].forEach(a => {
+        if (sim.cpu[a] === 0) return;
+        ['l','r'].forEach(d => {
+          if (sim.me[d] === 0) return;
+          if (applyHit(sim.cpu[a] + sim.me[d]) === 0) killChance++;
+        });
+      });
+      s += killChance * 15; // 킬 가능성 생기면 높은 점수
+      // 쪼갠 후 상대가 나를 킬할 수 있는지
+      let myRisk = 0;
+      ['l','r'].forEach(ms => {
+        if (sim.me[ms] === 0) return;
+        ['l','r'].forEach(cs => {
+          if (sim.cpu[cs] === 0) return;
+          if (applyHit(sim.me[ms] + sim.cpu[cs]) === 0) myRisk++;
+        });
+      });
+      s -= myRisk * 10;
+      if (killChance === 0 && myRisk >= 0) s -= 3; // 킬도 못 만들고 위험만 늘면 감점
+    }
+  }
+  s += Math.random() * 2;
+  return s;
+}
 
 // ═══ 렌더 ═══
 function render() {
@@ -1340,7 +1386,31 @@ function resetRound() {
   }
 }
 function rematch() { document.getElementById('resOv').classList.remove('show'); resetRound(); }
-function goMenu() { document.getElementById('gameScreen').style.display = 'none'; document.getElementById('resOv').classList.remove('show'); document.getElementById('diffScreen').classList.add('show'); }
+function goMenu() {
+  // 카메라 끄기
+  const camEl = document.getElementById('camFull');
+  if (camEl.srcObject) {
+    camEl.srcObject.getTracks().forEach(t => t.stop());
+    camEl.srcObject = null;
+  }
+  const htVid = document.getElementById('htV');
+  if (htVid.srcObject) {
+    htVid.srcObject.getTracks().forEach(t => t.stop());
+    htVid.srcObject = null;
+  }
+  // 터치 요소 정리
+  const touchBg = document.getElementById('touchBg');
+  if (touchBg) touchBg.remove();
+  document.getElementById('myHandsTouch').style.display = 'none';
+  // 화면 전환
+  document.getElementById('gameScreen').style.display = 'none';
+  document.getElementById('resOv').classList.remove('show');
+  document.getElementById('splitGuide').classList.remove('show');
+  document.getElementById('diffScreen').classList.add('show');
+  htOn = false;
+  splitMode = false;
+  if (splitAutoTimer) { clearTimeout(splitAutoTimer); splitAutoTimer = null; }
+}
 
 // 키보드 폴백
 document.addEventListener('keydown', e => {
@@ -1437,6 +1507,13 @@ function launch() {
   const names = { easy: '😴 하수', medium: '🤔 중수', hard: '😈 고수' };
   document.getElementById('gDf').textContent = names[diff];
   document.getElementById('diffBtn').textContent = names[diff];
+
+  // 이전 모드 잔재 정리
+  const touchBg = document.getElementById('touchBg');
+  if (touchBg) touchBg.remove();
+  document.getElementById('myHandsTouch').style.display = 'none';
+  document.getElementById('camFull').style.display = '';
+  document.getElementById('overlay').style.display = '';
 
   if (gameMode === 'cam') {
     initCam();
@@ -1697,6 +1774,33 @@ function renderTouch() {
     splitBtn.style.display = (G.phase === 'my-turn' && !G.over && canSplit()) ? 'flex' : 'none';
   }
 }
+
+// ═══ 탭 비활성 시 카메라 끄기 ═══
+let camStreamBackup = null;
+
+document.addEventListener('visibilitychange', () => {
+  if (gameMode !== 'cam' || !htOn) return;
+
+  const camEl = document.getElementById('camFull');
+  const htVid = document.getElementById('htV');
+
+  if (document.hidden) {
+    // 탭 숨김 → 카메라 끄기
+    if (camEl.srcObject) {
+      camEl.srcObject.getTracks().forEach(t => t.stop());
+      camEl.srcObject = null;
+    }
+    if (htVid.srcObject) {
+      htVid.srcObject.getTracks().forEach(t => t.stop());
+      htVid.srcObject = null;
+    }
+  } else {
+    // 탭 다시 보임 → 카메라 재시작
+    if (!camEl.srcObject && htOn) {
+      initCam();
+    }
+  }
+});
 </script>
 </body>
 </html>
