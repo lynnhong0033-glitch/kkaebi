@@ -1241,8 +1241,13 @@ function cpuTurn() {
 
     // 상단의 실제 CPU 손 SVG 자체를 내려보내는 애니메이션
     const cpuHandEl = document.getElementById(ch.a === 'l' ? 'cpuLWrap' : 'cpuRWrap');
+    // 같은 쪽이면 직진, 반대쪽이면 대각선
+    let moveX = 0;
+    if (ch.a === 'l' && ch.d === 'r') moveX = 80;   // CPU왼손 → 내 오른손: 오른쪽으로
+    if (ch.a === 'r' && ch.d === 'l') moveX = -80;  // CPU오른손 → 내 왼손: 왼쪽으로
+
     cpuHandEl.style.transition = 'transform 0.5s ease-in';
-    cpuHandEl.style.transform = 'translateY(250px) scale(1.15)';
+    cpuHandEl.style.transform = `translate(${moveX}px, 250px) scale(1.15)`;
     cpuHandEl.style.zIndex = '36';
 
     // 모션이 내려와서 치는 시점
@@ -1254,7 +1259,7 @@ function cpuTurn() {
 
       // 바운스
       cpuHandEl.style.transition = 'transform 0.15s ease-out';
-      cpuHandEl.style.transform = 'translateY(230px) scale(1.1)';
+      cpuHandEl.style.transform = `translate(${moveX}px, 230px) scale(1.1)`;
 
       const raw = cpuVal + myOld;
       G.me[ch.d] = applyHit(raw);
@@ -1274,7 +1279,7 @@ function cpuTurn() {
       // 손 되돌리기
       setTimeout(() => {
         cpuHandEl.style.transition = 'transform 0.4s ease-out';
-        cpuHandEl.style.transform = 'translateY(0) scale(1)';
+        cpuHandEl.style.transform = 'translate(0, 0) scale(1)';
         cpuHandEl.style.zIndex = '';
       }, 400);
 
