@@ -52,32 +52,45 @@
   /* 컴퓨터 손 영역 (상단) - 손가락이 아래를 향함 */
   .cpu-zone{
     position:absolute;top:0;left:0;right:0;z-index:10;
-    display:flex;justify-content:center;gap:3rem;
-    padding:0.5rem 1rem 0;
-    background:linear-gradient(180deg,#000000dd 0%,#000000aa 60%,transparent 100%);
-    min-height:160px;
+    display:flex;justify-content:center;gap:1.5rem;
+    padding:0.5rem 0.5rem 0;
+    background:linear-gradient(180deg,#000000ee 0%,#000000bb 70%,transparent 100%);
+    min-height:260px;
   }
 
   .cpu-hw{display:flex;flex-direction:column;align-items:center;position:relative;}
-  .cpu-hl{font-size:0.6rem;color:var(--dim);margin-bottom:0.2rem;}
-  .cpu-hand-svg{width:90px;height:130px;}
-  .cpu-fc{font-family:'Outfit';font-weight:900;font-size:1.3rem;color:var(--cpu);margin-top:-0.2rem;}
+  .cpu-hl{font-size:0.7rem;color:#ffffff88;margin-bottom:0.1rem;font-weight:700;}
+  .cpu-hand-svg{width:160px;height:220px;}
+  .cpu-fc{font-family:'Outfit';font-weight:900;font-size:1.6rem;color:#fff;margin-top:-0.3rem;text-shadow:0 2px 6px #000;}
 
   /* 타겟 영역 표시 (공격시 손가락이 여기 넘으면 공격) */
   .target-zone{
-    position:absolute;top:0;left:0;right:0;height:35%;z-index:5;
+    position:absolute;top:0;left:0;right:0;height:38%;z-index:5;
     pointer-events:none;
-    border-bottom:2px dashed transparent;
+    border-bottom:3px solid transparent;
     transition:all 0.3s;
   }
   .target-zone.active{
-    border-bottom:2px dashed #ffffff44;
+    border-bottom:3px solid #ff6b3588;
+    background:linear-gradient(180deg, transparent 60%, #ff6b3512 100%);
+  }
+  .target-zone.active::before{
+    content:'';
+    position:absolute;bottom:-2px;left:0;right:0;height:4px;
+    background:linear-gradient(90deg, transparent, #ff6b35aa, transparent);
+    animation:linePulse 1.5s ease-in-out infinite;
+  }
+  @keyframes linePulse{
+    0%,100%{opacity:0.4;}
+    50%{opacity:1;}
   }
   .target-zone.active::after{
-    content:'↑ 손가락을 여기 넘기면 공격!';
-    position:absolute;bottom:6px;left:50%;transform:translateX(-50%);
-    font-size:0.65rem;color:#ffffff55;white-space:nowrap;
-    font-weight:700;
+    content:'⚔️ 이 선 위로 손을 올리면 공격!';
+    position:absolute;bottom:8px;left:50%;transform:translateX(-50%);
+    font-size:0.75rem;color:#ff6b35cc;white-space:nowrap;
+    font-weight:900;
+    text-shadow:0 1px 4px #000;
+    background:#00000088;padding:0.2rem 0.8rem;border-radius:6px;
   }
 
   /* 내 손 정보 */
@@ -117,17 +130,19 @@
   .num-pop{position:absolute;z-index:25;pointer-events:none;font-family:'Outfit';font-weight:900;font-size:2rem;animation:nP 1s ease-out forwards;}
   @keyframes nP{0%{transform:translateY(0) scale(.8);opacity:1;}100%{transform:translateY(-60px) scale(1.2);opacity:0;}}
 
-  /* CPU 공격 손 모션 */
+  /* CPU 공격 손 모션 - 위에서 내 손까지 내려와서 치기 */
   .cpu-atk-hand{
     position:absolute;z-index:35;pointer-events:none;
-    width:80px;height:110px;
-    animation:cpuSwing 0.7s ease-in-out forwards;
+    width:130px;height:180px;
+    animation:cpuSwing 1s ease-in forwards;
   }
   @keyframes cpuSwing{
-    0%{transform:translateY(-80px) rotate(-5deg);opacity:0.8;}
-    40%{transform:translateY(60px) rotate(3deg);opacity:1;}
-    55%{transform:translateY(50px) rotate(-2deg);opacity:1;}
-    100%{transform:translateY(0px) rotate(0deg);opacity:0;}
+    0%{transform:translateY(0px) scale(0.8);opacity:0;}
+    15%{transform:translateY(20px) scale(1);opacity:1;}
+    60%{transform:translateY(280px) scale(1.1);opacity:1;}
+    72%{transform:translateY(260px) scale(1);opacity:1;}
+    85%{transform:translateY(270px) scale(1.05);opacity:0.8;}
+    100%{transform:translateY(280px) scale(1);opacity:0;}
   }
 
   /* 실황 메시지 (중앙 큰 글씨) */
@@ -287,15 +302,15 @@
   <div class="cpu-zone" id="cpuZone">
     <div class="cpu-hw">
       <div class="cpu-hl">왼손</div>
-      <svg class="cpu-hand-svg" id="svgCL" viewBox="0 0 90 130"></svg>
+      <svg class="cpu-hand-svg" id="svgCL" viewBox="0 0 110 160"></svg>
       <div class="cpu-fc" id="cpuLC">1</div>
     </div>
     <div style="display:flex;align-items:center;padding:0 0.3rem;">
-      <span style="font-family:'Outfit';font-weight:900;font-size:0.7rem;color:var(--cpu);letter-spacing:2px;writing-mode:vertical-rl;">COMPUTER</span>
+      <span style="font-family:'Outfit';font-weight:900;font-size:0.7rem;color:#ffffff88;letter-spacing:2px;writing-mode:vertical-rl;">COMPUTER</span>
     </div>
     <div class="cpu-hw">
       <div class="cpu-hl">오른손</div>
-      <svg class="cpu-hand-svg" id="svgCR" viewBox="0 0 90 130"></svg>
+      <svg class="cpu-hand-svg" id="svgCR" viewBox="0 0 110 160"></svg>
       <div class="cpu-fc" id="cpuRC">1</div>
     </div>
   </div>
@@ -377,36 +392,73 @@
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3.1675466862/camera_utils.min.js"></script>
 
 <script>
-// ═══ SVG: 위에서 아래로 손가락 내림 (👇 방향) ═══
+// ═══ SVG: 이모지 노란색 도톰 둥근 손 (👇 방향) ═══
 function drawCpuSvg(svg, count, dead) {
+  const skin = '#FFCC4D';
+  const skinDark = '#F0A830';
+  const skinLight = '#FFE082';
+  const nail = '#FFEEBB';
+  const shadow = '#E09520';
+  const outline = '#D4911A';
+
   if (dead) {
-    svg.innerHTML = `<rect x="20" y="5" width="50" height="55" rx="12" fill="#1a1a2e" stroke="#333" stroke-width="1.5"/>
-      <text x="45" y="42" text-anchor="middle" fill="#ef4444" font-size="22">💀</text>`;
+    svg.innerHTML = `
+      <ellipse cx="55" cy="45" rx="40" ry="38" fill="#444" stroke="#555" stroke-width="2"/>
+      <text x="55" y="48" text-anchor="middle" fill="#ef4444" font-size="40">💀</text>
+      <text x="55" y="78" text-anchor="middle" fill="#777" font-size="12" font-weight="bold">OUT</text>`;
     return;
   }
-  // 손바닥 (위쪽)
-  let h = `<rect x="20" y="5" width="50" height="50" rx="11" fill="#1e3a3a" stroke="#2dd4a8" stroke-width="1.5"/>`;
-  // 손가락 아래로 뻗음
-  const fx = [28, 35, 43, 51]; // 검지~소지 x
-  const fh = [36, 42, 38, 32]; // 각 길이
-  const pat = { 0: [], 1: [0], 2: [0,1], 3: [0,1,2], 4: [0,1,2,3] };
-  const active = pat[Math.min(count, 4)] || [];
 
-  fx.forEach((x, i) => {
+  let h = '';
+
+  // 손목 (위쪽)
+  h += `<rect x="30" y="0" width="50" height="24" rx="12" fill="${skin}" stroke="${outline}" stroke-width="1.5"/>`;
+
+  // 손바닥 (큰 둥근 덩어리)
+  h += `<rect x="14" y="14" width="82" height="74" rx="24" fill="${skin}" stroke="${outline}" stroke-width="2"/>`;
+  h += `<ellipse cx="55" cy="40" rx="30" ry="20" fill="${skinLight}" opacity="0.3"/>`;
+
+  // 엄지 (왼쪽, 도톰 둥글)
+  h += `<ellipse cx="12" cy="44" rx="14" ry="22" fill="${skin}" stroke="${outline}" stroke-width="1.5" transform="rotate(10, 12, 44)"/>`;
+  h += `<ellipse cx="10" cy="39" rx="6" ry="9" fill="${skinLight}" opacity="0.3"/>`;
+  h += `<ellipse cx="8" cy="62" rx="8" ry="6" fill="${nail}" stroke="${skinDark}" stroke-width="0.5"/>`;
+
+  // 손가락 (아래로, 도톰 소시지)
+  const fingers = [
+    { cx: 30, w: 18, maxH: 62 },
+    { cx: 50, w: 19, maxH: 72 },
+    { cx: 70, w: 18, maxH: 62 },
+    { cx: 88, w: 16, maxH: 50 },
+  ];
+
+  const patterns = { 0: [], 1: [0], 2: [0,1], 3: [0,1,2], 4: [0,1,2,3] };
+  const active = patterns[Math.min(count, 4)] || [];
+
+  fingers.forEach((f, i) => {
     const isDown = active.includes(i);
+    const startY = 80;
+    const r = f.w / 2;
+
     if (isDown) {
-      const len = fh[i];
-      // 펴진 손가락 (아래로)
-      h += `<rect x="${x}" y="50" width="8" height="${len}" rx="4" fill="#1e3a3a" stroke="#2dd4a8" stroke-width="1.5"/>`;
-      // 손톱 (하단)
-      h += `<rect x="${x+1.5}" y="${50+len-7}" width="5" height="7" rx="2.5" fill="#4ecdc4"/>`;
+      const len = f.maxH;
+      // 그림자
+      h += `<rect x="${f.cx - r + 2}" y="${startY + 3}" width="${f.w}" height="${len}" rx="${r}" fill="${shadow}" opacity="0.2"/>`;
+      // 본체 (도톰 둥글)
+      h += `<rect x="${f.cx - r}" y="${startY}" width="${f.w}" height="${len}" rx="${r}" fill="${skin}" stroke="${outline}" stroke-width="1.5"/>`;
+      // 광택
+      h += `<rect x="${f.cx - r + 3}" y="${startY + 8}" width="5" height="${len - 28}" rx="2.5" fill="${skinLight}" opacity="0.45"/>`;
+      // 마디
+      h += `<line x1="${f.cx - r + 4}" y1="${startY + 18}" x2="${f.cx + r - 4}" y2="${startY + 18}" stroke="${skinDark}" stroke-width="1.2" opacity="0.35" stroke-linecap="round"/>`;
+      h += `<line x1="${f.cx - r + 4}" y1="${startY + 35}" x2="${f.cx + r - 4}" y2="${startY + 35}" stroke="${skinDark}" stroke-width="1.2" opacity="0.35" stroke-linecap="round"/>`;
+      // 손톱
+      h += `<rect x="${f.cx - r + 3}" y="${startY + len - 18}" width="${f.w - 6}" height="18" rx="${(f.w - 6) / 2}" fill="${nail}" stroke="${skinDark}" stroke-width="0.5"/>`;
+      h += `<rect x="${f.cx - r + 5}" y="${startY + len - 15}" width="${f.w - 10}" height="6" rx="3" fill="#fff" opacity="0.5"/>`;
     } else {
-      // 접힌 손가락 (짧게)
-      h += `<rect x="${x}" y="50" width="8" height="8" rx="4" fill="#1e3a3a" stroke="#2dd4a844" stroke-width="1"/>`;
+      // 접힌 (짧은 도톰 볼록)
+      h += `<ellipse cx="${f.cx}" cy="${startY + 8}" rx="${r - 1}" ry="9" fill="${skinDark}" stroke="${shadow}" stroke-width="0.8" opacity="0.5"/>`;
     }
   });
-  // 엄지 (왼쪽으로 약간)
-  h += `<rect x="14" y="18" width="10" height="20" rx="5" fill="#1e3a3a" stroke="#2dd4a866" stroke-width="1" transform="rotate(15, 19, 28)"/>`;
+
   svg.innerHTML = h;
 }
 
@@ -492,7 +544,26 @@ function onHR(res) {
 
     if (!handDetected && res.multiHandLandmarks.length >= 1) {
       handDetected = true;
-      document.getElementById('handGuide').classList.add('hidden');
+      // 카운트다운 후 시작 (손 갖다대자마자 공격 방지)
+      gestReady = false;
+      const guide = document.getElementById('handGuide');
+      guide.querySelector('.g-text').textContent = '손 인식 완료!';
+      guide.querySelector('.g-sub').textContent = '3초 후 게임 시작...';
+      guide.querySelector('.g-hand').textContent = '3️⃣';
+      setTimeout(() => {
+        guide.querySelector('.g-hand').textContent = '2️⃣';
+        guide.querySelector('.g-sub').textContent = '손을 아래로 내려주세요!';
+      }, 1000);
+      setTimeout(() => {
+        guide.querySelector('.g-hand').textContent = '1️⃣';
+      }, 2000);
+      setTimeout(() => {
+        guide.classList.add('hidden');
+        gestReady = true;
+        prevLeftInZone = leftHandY < ATTACK_ZONE;
+        prevRightInZone = rightHandY < ATTACK_ZONE;
+        setSt('손을 올려서 공격하세요 👆');
+      }, 3000);
     }
   }
 
@@ -685,16 +756,15 @@ function showCpuAtkMotion(leftPos, fingerCount) {
   const el = document.createElement('div');
   el.className = 'cpu-atk-hand';
   el.style.left = leftPos;
-  el.style.top = '10%';
-  // SVG 손 그리기
+  el.style.top = '5%';
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.setAttribute('viewBox', '0 0 90 130');
-  svg.setAttribute('width', '80');
-  svg.setAttribute('height', '110');
+  svg.setAttribute('viewBox', '0 0 110 160');
+  svg.setAttribute('width', '130');
+  svg.setAttribute('height', '180');
   drawCpuSvg(svg, fingerCount, false);
   el.appendChild(svg);
   document.getElementById('gameScreen').appendChild(el);
-  setTimeout(() => el.remove(), 700);
+  setTimeout(() => el.remove(), 1000);
 }
 
 // 손가락 안내 팝업
@@ -773,16 +843,21 @@ function cpuTurn() {
     const myHandName = ch.d === 'l' ? '왼손' : '오른손';
     const cpuVal = G.cpu[ch.a];
     const myOld = G.me[ch.d];
-    setSt(`컴퓨터 ${cpuHandName}(${cpuVal})이 내 ${myHandName}(${myOld})을 노린다!`);
+    setSt(`⚠️ 컴퓨터 ${cpuHandName}(${cpuVal})이 내 ${myHandName}(${myOld})을 노린다!`);
 
     // CPU 손 내려오는 모션 SVG
-    const atkX = ch.d === 'l' ? '20%' : '65%';
+    const atkX = ch.d === 'l' ? '15%' : '55%';
     showCpuAtkMotion(atkX, cpuVal);
 
+    // 모션이 내려와서 치는 시점 (0.6초 뒤)
     setTimeout(() => {
       const raw = cpuVal + myOld;
       G.me[ch.d] = applyHit(raw);
       const newVal = G.me[ch.d];
+
+      // 💥 이펙트
+      const x = ch.d === 'l' ? '25%' : '75%';
+      showFx(x, '65%', '💥', 'clash-fx');
 
       // 실황 메시지
       let line2 = `${myOld} + ${cpuVal} = ${raw}`;
@@ -790,8 +865,6 @@ function cpuTurn() {
       if (newVal === 0) { line2 += ' → 💀 사망!'; line3 = '내 손이 죽었습니다!'; }
       showPlayMsg(`컴퓨터 ${cpuHandName}(${cpuVal})이 내 ${myHandName}(${myOld})을 쳤다!`, line2, line3);
 
-      const x = ch.d === 'l' ? '25%' : '75%';
-      showFx(x, '72%', '💥', 'clash-fx');
       turns++; render();
 
       // 손가락 안내
@@ -803,7 +876,7 @@ function cpuTurn() {
       if (G.me.l === 0 && G.me.r === 0) { G.over = true; render(); setTimeout(() => showRes('lose'), 1200); return; }
       setTimeout(() => {
         G.phase = 'my-turn'; render(); setSt('손을 올려서 공격하세요 👆');
-      }, 1500);
+      }, 2000);
     }, 800);
   }
 }
