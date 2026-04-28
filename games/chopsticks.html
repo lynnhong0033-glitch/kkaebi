@@ -271,6 +271,38 @@
   }
   .touch-split-btn:disabled{opacity:0.2;cursor:default;}
 
+  .b-btn-share{background:#ff6b3530;color:var(--me);}
+
+  /* 공유 모달 */
+  .share-modal{
+    position:fixed;inset:0;z-index:120;
+    display:none;align-items:center;justify-content:center;
+    background:#000000ee;backdrop-filter:blur(8px);
+  }
+  .share-modal.show{display:flex;}
+  .share-box{
+    background:var(--card);border:1px solid var(--border);border-radius:20px;
+    padding:2rem;text-align:center;max-width:340px;width:90%;
+  }
+  .share-title{font-family:'Black Han Sans';font-size:1.3rem;margin-bottom:0.3rem;color:var(--gold);}
+  .share-desc{font-size:0.8rem;color:var(--dim);margin-bottom:1.2rem;}
+  .share-btns{display:flex;flex-direction:column;gap:0.5rem;margin-bottom:0.8rem;}
+  .share-btn{
+    font-family:'Noto Sans KR';font-weight:700;font-size:0.9rem;
+    padding:0.7rem 1rem;border:none;border-radius:10px;
+    cursor:pointer;transition:all 0.2s;text-align:center;
+  }
+  .share-btn:hover{transform:scale(1.02);}
+  .s-kakao{background:#FEE500;color:#3C1E1E;}
+  .s-twitter{background:#1a1a2e;color:#fff;border:1px solid #333;}
+  .s-facebook{background:#1877F2;color:#fff;}
+  .s-line{background:#06C755;color:#fff;}
+  .s-copy{background:#333;color:#fff;}
+  .share-copied{font-size:0.8rem;color:var(--cpu);margin-bottom:0.5rem;}
+  .share-close{
+    font-size:0.8rem;color:var(--muted);background:none;border:none;cursor:pointer;margin-top:0.3rem;
+  }
+
   /* 터치 모드 배경 */
   .touch-bg{
     position:absolute;inset:0;z-index:0;
@@ -399,9 +431,11 @@
 
   <div class="bot-ui">
     <div class="sc-box"><span style="color:var(--me)" id="sMe">0</span><span style="color:var(--muted)"> : </span><span style="color:var(--cpu)" id="sCpu">0</span></div>
-    <div style="display:flex;gap:0.4rem;">
-      <button class="b-btn" onclick="toggleHelp()">❓</button>
-      <button class="b-btn" onclick="goMenu()">🏠</button>
+    <div style="display:flex;gap:0.3rem;flex-wrap:wrap;">
+      <button class="b-btn" onclick="toggleHelp()">게임규칙</button>
+      <button class="b-btn" onclick="resetRound()">🔄 재시작</button>
+      <button class="b-btn" onclick="location.href='../index.html'">🏠 홈</button>
+      <button class="b-btn b-btn-share" onclick="toggleShare()">📤 공유</button>
     </div>
   </div>
 
@@ -459,7 +493,28 @@
 <div class="ov" id="resOv">
   <div class="ovb">
     <h2 id="rT"></h2><p class="os" id="rS"></p><p class="ost" id="rSt"></p>
-    <div class="ovbs"><button class="ob ob-p" onclick="rematch()">다시 하기</button><button class="ob ob-g" onclick="goMenu()">메뉴로</button></div>
+    <div class="ovbs">
+      <button class="ob ob-p" onclick="rematch()">다시 하기</button>
+      <button class="ob ob-g" onclick="toggleShare()">📤 공유</button>
+      <button class="ob ob-g" onclick="goMenu()">메뉴로</button>
+    </div>
+  </div>
+</div>
+
+<!-- 공유 모달 -->
+<div class="share-modal" id="shareModal">
+  <div class="share-box">
+    <div class="share-title">📤 친구에게 공유하기</div>
+    <div class="share-desc">이 게임 해봐! 🥢 젓가락 게임</div>
+    <div class="share-btns">
+      <button class="share-btn s-kakao" onclick="shareKakao()">💬 카카오톡</button>
+      <button class="share-btn s-twitter" onclick="shareTwitter()">𝕏 트위터</button>
+      <button class="share-btn s-facebook" onclick="shareFacebook()">f 페이스북</button>
+      <button class="share-btn s-line" onclick="shareLine()">💚 라인</button>
+      <button class="share-btn s-copy" onclick="shareCopy()">🔗 링크 복사</button>
+    </div>
+    <div class="share-copied" id="shareCopied" style="display:none;">✅ 링크가 복사되었습니다!</div>
+    <button class="share-close" onclick="toggleShare()">닫기</button>
   </div>
 </div>
 
@@ -468,6 +523,128 @@
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3.1675466862/camera_utils.min.js"></script>
 
 <script>
+// ═══ 사운드 시스템 (Web Audio API - 저작권 무관) ═══
+let audioCtx = null;
+function getAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function sfxHit() {
+  const ctx = getAudio();
+  // 탁! 치는 소리
+  const o = ctx.createOscillator();
+  const g = ctx.createGain();
+  o.type = 'square';
+  o.frequency.setValueAtTime(200, ctx.currentTime);
+  o.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.1);
+  g.gain.setValueAtTime(0.3, ctx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+  o.connect(g); g.connect(ctx.destination);
+  o.start(); o.stop(ctx.currentTime + 0.15);
+
+  // 노이즈 (슬랩 질감)
+  const buf = ctx.createBuffer(1, ctx.sampleRate * 0.08, ctx.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * 0.2;
+  const n = ctx.createBufferSource();
+  const ng = ctx.createGain();
+  n.buffer = buf;
+  ng.gain.setValueAtTime(0.25, ctx.currentTime);
+  ng.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.08);
+  n.connect(ng); ng.connect(ctx.destination);
+  n.start(); n.stop(ctx.currentTime + 0.08);
+}
+
+function sfxKill() {
+  const ctx = getAudio();
+  // 으악! 죽는 소리
+  const o = ctx.createOscillator();
+  const g = ctx.createGain();
+  o.type = 'sawtooth';
+  o.frequency.setValueAtTime(400, ctx.currentTime);
+  o.frequency.exponentialRampToValueAtTime(60, ctx.currentTime + 0.4);
+  g.gain.setValueAtTime(0.25, ctx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+  o.connect(g); g.connect(ctx.destination);
+  o.start(); o.stop(ctx.currentTime + 0.4);
+}
+
+function sfxWin() {
+  const ctx = getAudio();
+  // 빠밤~ 승리 팡파레
+  const notes = [523, 659, 784, 1047]; // C5 E5 G5 C6
+  notes.forEach((freq, i) => {
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = 'triangle';
+    o.frequency.value = freq;
+    g.gain.setValueAtTime(0, ctx.currentTime + i * 0.15);
+    g.gain.linearRampToValueAtTime(0.2, ctx.currentTime + i * 0.15 + 0.05);
+    g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + i * 0.15 + 0.3);
+    o.connect(g); g.connect(ctx.destination);
+    o.start(ctx.currentTime + i * 0.15);
+    o.stop(ctx.currentTime + i * 0.15 + 0.3);
+  });
+}
+
+function sfxLose() {
+  const ctx = getAudio();
+  // 뚜뚜뚜... 패배
+  const notes = [392, 330, 262, 196]; // G4 E4 C4 G3
+  notes.forEach((freq, i) => {
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = 'sine';
+    o.frequency.value = freq;
+    g.gain.setValueAtTime(0, ctx.currentTime + i * 0.2);
+    g.gain.linearRampToValueAtTime(0.15, ctx.currentTime + i * 0.2 + 0.05);
+    g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + i * 0.2 + 0.25);
+    o.connect(g); g.connect(ctx.destination);
+    o.start(ctx.currentTime + i * 0.2);
+    o.stop(ctx.currentTime + i * 0.2 + 0.25);
+  });
+}
+
+function sfxSplit() {
+  const ctx = getAudio();
+  // 띵~ 쪼개기
+  const o = ctx.createOscillator();
+  const g = ctx.createGain();
+  o.type = 'sine';
+  o.frequency.setValueAtTime(880, ctx.currentTime);
+  o.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.2);
+  g.gain.setValueAtTime(0.15, ctx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+  o.connect(g); g.connect(ctx.destination);
+  o.start(); o.stop(ctx.currentTime + 0.2);
+}
+
+function sfxTurn() {
+  const ctx = getAudio();
+  // 뚝 - 턴 시작
+  const o = ctx.createOscillator();
+  const g = ctx.createGain();
+  o.type = 'sine';
+  o.frequency.value = 660;
+  g.gain.setValueAtTime(0.1, ctx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+  o.connect(g); g.connect(ctx.destination);
+  o.start(); o.stop(ctx.currentTime + 0.1);
+}
+
+function sfxCountdown() {
+  const ctx = getAudio();
+  const o = ctx.createOscillator();
+  const g = ctx.createGain();
+  o.type = 'sine';
+  o.frequency.value = 440;
+  g.gain.setValueAtTime(0.12, ctx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+  o.connect(g); g.connect(ctx.destination);
+  o.start(); o.stop(ctx.currentTime + 0.15);
+}
+
 // ═══ SVG: 이모지 노란색 도톰 둥근 손 (👇 방향) ═══
 function drawCpuSvg(svg, count, dead) {
   const skin = '#FFCC4D';
@@ -587,10 +764,10 @@ async function initCam() {
     document.getElementById('gameScreen').style.display = 'block';
     resetRound();
   } catch (e) {
-    console.error(e);
-    document.getElementById('gameScreen').style.display = 'block';
-    document.getElementById('handGuide').innerHTML = `<div class="g-text">⚠️ 카메라 연결 실패</div><div class="g-sub">카메라 권한을 허용해주세요<br>또는 Q/W 키로 플레이 가능</div>`;
-    htOn = false; resetRound();
+    console.error('카메라 오류:', e);
+    // 카메라 실패 → 자동으로 터치 모드 전환
+    gameMode = 'touch';
+    initTouchMode();
   }
 }
 
@@ -626,18 +803,22 @@ function onHR(res) {
       guide.querySelector('.g-text').textContent = '손 인식 완료!';
       guide.querySelector('.g-sub').textContent = '3초 후 게임 시작...';
       guide.querySelector('.g-hand').textContent = '3️⃣';
+      sfxCountdown();
       setTimeout(() => {
         guide.querySelector('.g-hand').textContent = '2️⃣';
         guide.querySelector('.g-sub').textContent = '손을 아래로 내려주세요!';
+        sfxCountdown();
       }, 1000);
       setTimeout(() => {
         guide.querySelector('.g-hand').textContent = '1️⃣';
+        sfxCountdown();
       }, 2000);
       setTimeout(() => {
         guide.classList.add('hidden');
         gestReady = true;
         prevLeftInZone = leftHandY < ATTACK_ZONE;
         prevRightInZone = rightHandY < ATTACK_ZONE;
+        sfxTurn();
         setSt(gameMode==='touch'?'내 손을 터치해서 공격하세요 👆':'손을 올려서 공격하세요 👆');
       }, 3000);
     }
@@ -774,6 +955,9 @@ function execAtk(mh, ch) {
   const raw = G.cpu[ch] + v;
   G.cpu[ch] = applyHit(raw);
   const newCpu = G.cpu[ch];
+
+  // 사운드
+  if (newCpu === 0) sfxKill(); else sfxHit();
 
   // 실황 메시지
   const myHandName = mh === 'l' ? '왼손' : '오른손';
@@ -957,6 +1141,7 @@ function confirmSplit() {
   splitMode = false;
   document.getElementById('splitGuide').classList.remove('show');
   showPlayMsg('쪼개기!', `${nL} / ${nR}`, '', true);
+  sfxSplit();
   turns++;
   G.phase = 'cpu-turn'; render();
   setSt('컴퓨터 생각 중...');
@@ -1017,6 +1202,9 @@ function cpuTurn() {
       G.me[ch.d] = applyHit(raw);
       const newVal = G.me[ch.d];
 
+      // 사운드
+      if (newVal === 0) sfxKill(); else sfxHit();
+
       // 실황 메시지
       let line2 = `${myOld} + ${cpuVal} = ${raw}`;
       let line3 = '';
@@ -1073,8 +1261,8 @@ function setSt(t) { document.getElementById('stBar').innerHTML = t; }
 // ═══ 결과 ═══
 function showRes(r) {
   const t = document.getElementById('rT'), s = document.getElementById('rS'), st = document.getElementById('rSt');
-  if (r === 'win') { scores.me++; t.innerHTML = '🎉 승리!'; t.style.color = '#fbbf24'; s.textContent = { easy: '하수를 이겼습니다. 당연한 거 아닌가요?', medium: '중수를 꺾었습니다. 제법인데요?', hard: '고수를 이겼습니다. 진짜 고수는 당신이었습니다.' }[diff]; mkC(); }
-  else { scores.cpu++; t.innerHTML = '💀 패배...'; t.style.color = '#ef4444'; s.textContent = { easy: '하수한테 졌습니다. ...괜찮으세요?', medium: '중수의 실력을 보여드렸습니다.', hard: '고수는 자비가 없습니다.' }[diff]; }
+  if (r === 'win') { scores.me++; t.innerHTML = '🎉 승리!'; t.style.color = '#fbbf24'; s.textContent = { easy: '하수를 이겼습니다. 당연한 거 아닌가요?', medium: '중수를 꺾었습니다. 제법인데요?', hard: '고수를 이겼습니다. 진짜 고수는 당신이었습니다.' }[diff]; mkC(); sfxWin(); }
+  else { scores.cpu++; t.innerHTML = '💀 패배...'; t.style.color = '#ef4444'; s.textContent = { easy: '하수한테 졌습니다. ...괜찮으세요?', medium: '중수의 실력을 보여드렸습니다.', hard: '고수는 자비가 없습니다.' }[diff]; sfxLose(); }
   st.textContent = `전적 ${scores.me}승 ${scores.cpu}패 | ${turns}턴`; render(); document.getElementById('resOv').classList.add('show');
 }
 function mkC() { const cs = ['#ff6b35', '#2dd4a8', '#fbbf24', '#8b5cf6', '#f472b6']; for (let i = 0; i < 50; i++) { const c = document.createElement('div'); c.className = 'conf'; c.style.left = Math.random() * 100 + 'vw'; c.style.top = '-10px'; c.style.background = cs[Math.floor(Math.random() * cs.length)]; c.style.animationDelay = Math.random() * 2 + 's'; c.style.width = (5 + Math.random() * 8) + 'px'; c.style.height = (5 + Math.random() * 8) + 'px'; document.body.appendChild(c); setTimeout(() => c.remove(), 5000); } }
@@ -1108,6 +1296,47 @@ document.addEventListener('keydown', e => {
 // ═══ 초기화 ═══
 function skipTut() { document.getElementById('tutorial').classList.add('hidden'); document.getElementById('diffScreen').classList.add('show'); }
 function toggleHelp() { document.getElementById('helpPanel').classList.toggle('show'); }
+
+function toggleShare() { document.getElementById('shareModal').classList.toggle('show'); document.getElementById('shareCopied').style.display = 'none'; }
+
+function getShareUrl() { return window.location.href; }
+function getShareText() {
+  const scoreText = scores.me + scores.cpu > 0 ? ` (전적: ${scores.me}승 ${scores.cpu}패)` : '';
+  return `🥢 젓가락 게임${scoreText} - 무쓸모 뚝딱 프로그램 by KKAEBI`;
+}
+
+function shareKakao() {
+  const url = `https://story.kakao.com/share?url=${encodeURIComponent(getShareUrl())}`;
+  window.open(url, '_blank');
+}
+function shareTwitter() {
+  const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(getShareText())}&url=${encodeURIComponent(getShareUrl())}`;
+  window.open(url, '_blank');
+}
+function shareFacebook() {
+  const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(getShareUrl())}`;
+  window.open(url, '_blank');
+}
+function shareLine() {
+  const url = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(getShareUrl())}&text=${encodeURIComponent(getShareText())}`;
+  window.open(url, '_blank');
+}
+function shareCopy() {
+  navigator.clipboard.writeText(getShareUrl()).then(() => {
+    document.getElementById('shareCopied').style.display = 'block';
+    setTimeout(() => { document.getElementById('shareCopied').style.display = 'none'; }, 2000);
+  }).catch(() => {
+    // 폴백
+    const ta = document.createElement('textarea');
+    ta.value = getShareUrl();
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    document.getElementById('shareCopied').style.display = 'block';
+    setTimeout(() => { document.getElementById('shareCopied').style.display = 'none'; }, 2000);
+  });
+}
 
 let gameMode = null; // 'cam' or 'touch'
 
@@ -1149,34 +1378,35 @@ function launch() {
 // ═══ 터치 모드 ═══
 function initTouchMode() {
   htOn = false;
-  // 카메라 숨기고 배경 표시
   document.getElementById('camFull').style.display = 'none';
   document.getElementById('overlay').style.display = 'none';
 
-  // 배경 추가
-  const bg = document.createElement('div');
-  bg.className = 'touch-bg';
-  bg.id = 'touchBg';
-  document.getElementById('gameScreen').insertBefore(bg, document.getElementById('gameScreen').firstChild);
+  // 배경 (중복 방지)
+  if (!document.getElementById('touchBg')) {
+    const bg = document.createElement('div');
+    bg.className = 'touch-bg';
+    bg.id = 'touchBg';
+    document.getElementById('gameScreen').insertBefore(bg, document.getElementById('gameScreen').firstChild);
+  }
 
   // 내 손 SVG 표시
   document.getElementById('myHandsTouch').style.display = 'flex';
 
-  // 쪼개기 버튼
-  const spBtn = document.createElement('button');
-  spBtn.className = 'touch-split-btn';
-  spBtn.id = 'touchSpBtn';
-  spBtn.textContent = '👏 양손 부딪혀 쪼개기';
-  spBtn.onclick = () => {
-    if (canSplit()) {
-      openSplit();
-    }
-  };
-  document.getElementById('gameScreen').appendChild(spBtn);
+  // 쪼개기 버튼 (중복 방지)
+  if (!document.getElementById('touchSpBtn')) {
+    const spBtn = document.createElement('button');
+    spBtn.className = 'touch-split-btn';
+    spBtn.id = 'touchSpBtn';
+    spBtn.textContent = '👏 양손 부딪혀 쪼개기';
+    spBtn.onclick = () => {
+      if (canSplit()) {
+        openSplit();
+      }
+    };
+    document.getElementById('gameScreen').appendChild(spBtn);
+  }
 
-  // 안내 숨기기
   document.getElementById('handGuide').classList.add('hidden');
-
   document.getElementById('gameScreen').style.display = 'block';
   resetRound();
   setSt('내 손을 터치해서 공격하세요 👆');
@@ -1277,10 +1507,13 @@ function touchTargetCancel() {
 
 // 터치 모드 렌더 추가
 function renderTouch() {
-  if (gameMode !== 'touch') return;
+  if (!gameMode || gameMode !== 'touch') return;
+  const ml = document.getElementById('svgML');
+  const mr = document.getElementById('svgMR');
+  if (!ml || !mr) return;
 
-  drawMyHandSvg(document.getElementById('svgML'), G.me.l, G.me.l === 0);
-  drawMyHandSvg(document.getElementById('svgMR'), G.me.r, G.me.r === 0);
+  drawMyHandSvg(ml, G.me.l, G.me.l === 0);
+  drawMyHandSvg(mr, G.me.r, G.me.r === 0);
   document.getElementById('myLCt').textContent = G.me.l;
   document.getElementById('myRCt').textContent = G.me.r;
   document.getElementById('myLBox').classList.toggle('dead-hand', G.me.l === 0);
