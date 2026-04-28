@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>플래피 깨비 — KKAEBI</title>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Outfit:wght@400;800;900&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{background:#0a0a1a;overflow:hidden;touch-action:manipulation;user-select:none;}
+  canvas{display:block;position:absolute;inset:0;z-index:1;}
+  video#camBg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1);z-index:0;display:none;}
+
+  .menu{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10;background:linear-gradient(180deg,#1a1a3e 0%,#0f0f2a 100%);}
+  .menu.hidden{display:none;}
+  .menu h1{font-family:'Black Han Sans';font-size:clamp(2.5rem,8vw,4rem);color:#fbbf24;text-shadow:0 4px 20px #fbbf2444;margin-bottom:0.3rem;}
+  .menu .sub{font-family:'Noto Sans KR';font-size:1rem;color:#94a3b8;margin-bottom:0.5rem;}
+  .menu .desc{font-family:'Noto Sans KR';font-size:0.85rem;color:#64748b;margin-bottom:2rem;text-align:center;max-width:320px;line-height:1.5;}
+  .menu-btn{font-family:'Noto Sans KR';font-weight:900;font-size:1.1rem;padding:0.9rem 2.5rem;border:none;border-radius:14px;cursor:pointer;margin:0.4rem;transition:0.2s;}
+  .menu-btn:hover{transform:scale(1.05);}
+  .btn-play{background:#fbbf24;color:#1a1a2e;}
+  .btn-cam{background:#22c55e;color:#fff;}
+  .btn-ghost{background:#ffffff15;color:#cbd5e1;border:1px solid #ffffff20;}
+  .menu .brand{position:absolute;bottom:30px;font-size:0.8rem;color:#475569;}
+
+  .gameover{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10;background:#000000dd;backdrop-filter:blur(6px);}
+  .gameover.hidden{display:none;}
+  .gameover h2{font-family:'Black Han Sans';font-size:clamp(2rem,6vw,3rem);color:#ef4444;margin-bottom:0.5rem;}
+  .gameover .score-display{font-family:'Outfit';font-weight:900;font-size:3rem;color:#fbbf24;margin-bottom:0.1rem;}
+  .gameover .pushup-count{font-size:1rem;color:#22c55e;margin-bottom:0.3rem;}
+  .gameover .best{font-size:0.9rem;color:#94a3b8;margin-bottom:1.5rem;}
+  .go-btns{display:flex;gap:0.5rem;flex-wrap:wrap;justify-content:center;}
+
+  .share-modal{position:fixed;inset:0;z-index:20;display:none;align-items:center;justify-content:center;background:#000000ee;}
+  .share-modal.show{display:flex;}
+  .share-box{background:#1a1a2e;border:1px solid #ffffff20;border-radius:20px;padding:2rem;text-align:center;max-width:340px;width:90%;}
+  .share-title{font-family:'Black Han Sans';font-size:1.3rem;color:#fbbf24;margin-bottom:1rem;}
+  .share-btns{display:flex;flex-direction:column;gap:0.5rem;margin-bottom:0.8rem;}
+  .share-btn{font-family:'Noto Sans KR';font-weight:700;font-size:0.9rem;padding:0.7rem;border:none;border-radius:10px;cursor:pointer;}
+  .s-kakao{background:#FEE500;color:#3C1E1E;}
+  .s-twitter{background:#1a1a2e;color:#fff;border:1px solid #333;}
+  .s-copy{background:#333;color:#fff;}
+  .share-copied{color:#2dd4a8;font-size:0.8rem;display:none;margin-bottom:0.5rem;}
+  .share-close{font-size:0.8rem;color:#64748b;background:none;border:none;cursor:pointer;}
+
+  .pose-bar{position:fixed;left:12px;top:50%;transform:translateY(-50%);z-index:5;width:30px;height:200px;background:#ffffff15;border-radius:15px;border:2px solid #ffffff30;}
+  .pose-bar.hidden{display:none;}
+  .pose-fill{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(180deg,#fbbf24,#22c55e);border-radius:0 0 13px 13px;transition:height 0.1s;}
+  .pose-label{position:fixed;left:8px;top:calc(50% + 115px);z-index:5;font-family:'Noto Sans KR';font-size:0.65rem;color:#94a3b8;text-align:center;width:38px;}
+  .pose-label.hidden{display:none;}
+
+  .status-msg{position:fixed;top:15%;left:50%;transform:translateX(-50%);z-index:5;font-family:'Black Han Sans';font-size:clamp(1rem,3vw,1.4rem);color:#fbbf24;background:#000000aa;padding:0.4rem 1rem;border-radius:10px;pointer-events:none;}
+  .status-msg.hidden{display:none;}
+
+  .bot-bar{position:fixed;bottom:0;left:0;right:0;z-index:5;display:flex;justify-content:center;gap:0.3rem;padding:0.5rem;background:linear-gradient(transparent,#000000aa);}
+  .bot-bar.hidden{display:none;}
+  .b-btn{font-family:'Noto Sans KR';font-weight:700;font-size:0.7rem;padding:0.3rem 0.6rem;border:none;border-radius:8px;cursor:pointer;background:#ffffff20;color:#fff;}
+</style>
+</head>
+<body>
+
+<video id="camBg" autoplay playsinline muted></video>
+<canvas id="c"></canvas>
+
+<!-- 메뉴 -->
+<div class="menu" id="menuScreen">
+  <div style="font-size:4rem;margin-bottom:1rem;">👹</div>
+  <h1>플래피 깨비</h1>
+  <div class="sub">도깨비가 하늘을 난다!</div>
+  <div class="desc">🏋️ 푸시업 모드: 카메라 앞에서 푸시업하면 깨비가 점프!<br>👆 터치 모드: 화면 터치로 점프!</div>
+  <button class="menu-btn btn-cam" onclick="startGame('pushup')">🏋️ 푸시업으로 하기</button>
+  <button class="menu-btn btn-play" onclick="startGame('touch')">👆 터치/클릭으로 하기</button>
+  <button class="menu-btn btn-ghost" onclick="location.href='../index.html'">🏠 홈으로</button>
+  <div class="brand">@kkaebi.ai — 무쓸모 뚝딱 프로그램 #2</div>
+</div>
+
+<!-- 게임 오버 -->
+<div class="gameover hidden" id="goScreen">
+  <h2>💀 깨비 추락!</h2>
+  <div class="score-display" id="goScore">0</div>
+  <div class="pushup-count" id="goPushup"></div>
+  <div class="best" id="goBest">최고기록: 0</div>
+  <div class="go-btns">
+    <button class="menu-btn btn-play" onclick="startGame(currentMode)">🔄 다시하기</button>
+    <button class="menu-btn btn-ghost" onclick="toggleShare()">📤 공유</button>
+    <button class="menu-btn btn-ghost" onclick="goHome()">🏠 메뉴</button>
+  </div>
+</div>
+
+<!-- 공유 -->
+<div class="share-modal" id="shareModal">
+  <div class="share-box">
+    <div class="share-title">📤 친구에게 도전장!</div>
+    <div class="share-btns">
+      <button class="share-btn s-kakao" onclick="shareKakao()">💬 카카오톡</button>
+      <button class="share-btn s-twitter" onclick="shareTwitter()">𝕏 트위터</button>
+      <button class="share-btn s-copy" onclick="shareCopy()">🔗 링크 복사</button>
+    </div>
+    <div class="share-copied" id="shareCopied">✅ 복사 완료!</div>
+    <button class="share-close" onclick="toggleShare()">닫기</button>
+  </div>
+</div>
+
+<!-- 포즈 게이지 -->
+<div class="pose-bar hidden" id="poseBar"><div class="pose-fill" id="poseFill" style="height:0%"></div></div>
+<div class="pose-label hidden" id="poseLabel">자세↕️</div>
+
+<!-- 상태 메시지 -->
+<div class="status-msg hidden" id="statusMsg"></div>
+
+<!-- 하단 -->
+<div class="bot-bar hidden" id="botBar">
+  <button class="b-btn" onclick="goHome()">🏠 메뉴</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5.1675469404/pose.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3.1675466862/camera_utils.min.js"></script>
+<script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.4/kakao.min.js" crossorigin="anonymous"></script>
+
+<script>
+if (window.Kakao && !Kakao.isInitialized()) Kakao.init('f1f90f1eb42f4d8836c6d95cce909551');
+
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+
+let W, H, scale;
+function resize() { W = window.innerWidth; H = window.innerHeight; canvas.width = W; canvas.height = H; scale = Math.min(W / 400, H / 700); }
+resize(); window.addEventListener('resize', resize);
+
+// ═══ 상태 ═══
+let playing = false, currentMode = 'touch';
+let score = 0, pushupCount = 0;
+let best = parseInt(localStorage.getItem('flappy_best') || '0');
+let frameCount = 0;
+
+// 도깨비
+let gob = { x: 80, y: 0, vy: 0, r: 22, rot: 0 };
+let prevGobY = 0;
+const GRAVITY = 0.45, JUMP = -7.5;
+const PIPE_W = 60, GAP = 160, PIPE_SPEED = 2.5;
+let pipes = [], bgOffset = 0;
+
+// 포즈 감지
+let poseReady = false, shoulderY = 0.5, prevShoulderY = 0.5;
+let poseMinY = 1, poseMaxY = 0; // 어깨 위치 범위 (자동 캘리브레이션)
+
+// ═══ 사운드 ═══
+let audioCtx = null;
+function getAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); return audioCtx; }
+function sfxJump() { const c=getAudio(),o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.setValueAtTime(500,c.currentTime);o.frequency.exponentialRampToValueAtTime(800,c.currentTime+0.1);g.gain.setValueAtTime(0.12,c.currentTime);g.gain.exponentialRampToValueAtTime(0.01,c.currentTime+0.15);o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+0.15); }
+function sfxScore() { const c=getAudio();[660,880].forEach((f,i)=>{const o=c.createOscillator(),g=c.createGain();o.type='triangle';o.frequency.value=f;g.gain.setValueAtTime(0.1,c.currentTime+i*0.1);g.gain.exponentialRampToValueAtTime(0.01,c.currentTime+i*0.1+0.15);o.connect(g);g.connect(c.destination);o.start(c.currentTime+i*0.1);o.stop(c.currentTime+i*0.1+0.15);}); }
+function sfxDie() { const c=getAudio(),o=c.createOscillator(),g=c.createGain();o.type='sawtooth';o.frequency.setValueAtTime(300,c.currentTime);o.frequency.exponentialRampToValueAtTime(50,c.currentTime+0.5);g.gain.setValueAtTime(0.2,c.currentTime);g.gain.exponentialRampToValueAtTime(0.01,c.currentTime+0.5);o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+0.5); }
+function sfxPushup() { const c=getAudio(),o=c.createOscillator(),g=c.createGain();o.type='square';o.frequency.value=220;g.gain.setValueAtTime(0.08,c.currentTime);g.gain.exponentialRampToValueAtTime(0.01,c.currentTime+0.1);o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+0.1); }
+
+// ═══ 도깨비 그리기 ═══
+function drawGoblin(x, y, rot) {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(rot);
+  const s = scale * 0.9;
+  // 몸통
+  ctx.beginPath(); ctx.ellipse(0,0,20*s,18*s,0,0,Math.PI*2); ctx.fillStyle='#4ade80'; ctx.fill(); ctx.strokeStyle='#166534'; ctx.lineWidth=2; ctx.stroke();
+  // 배
+  ctx.beginPath(); ctx.ellipse(0,6*s,12*s,8*s,0,0,Math.PI*2); ctx.fillStyle='#86efac'; ctx.fill();
+  // 뿔
+  ctx.beginPath(); ctx.moveTo(-10*s,-14*s); ctx.lineTo(-6*s,-28*s); ctx.lineTo(-2*s,-14*s); ctx.fillStyle='#fbbf24'; ctx.fill();
+  ctx.beginPath(); ctx.moveTo(10*s,-14*s); ctx.lineTo(14*s,-28*s); ctx.lineTo(18*s,-14*s); ctx.fillStyle='#fbbf24'; ctx.fill();
+  // 눈
+  ctx.beginPath(); ctx.arc(-8*s,-4*s,5*s,0,Math.PI*2); ctx.fillStyle='#fff'; ctx.fill();
+  ctx.beginPath(); ctx.arc(-7*s,-3*s,2.5*s,0,Math.PI*2); ctx.fillStyle='#1a1a2e'; ctx.fill();
+  ctx.beginPath(); ctx.arc(8*s,-4*s,5*s,0,Math.PI*2); ctx.fillStyle='#fff'; ctx.fill();
+  ctx.beginPath(); ctx.arc(9*s,-3*s,2.5*s,0,Math.PI*2); ctx.fillStyle='#1a1a2e'; ctx.fill();
+  // 입+이빨
+  ctx.beginPath(); ctx.arc(0,4*s,6*s,0.1,Math.PI-0.1); ctx.strokeStyle='#166534'; ctx.lineWidth=2*s; ctx.stroke();
+  ctx.fillStyle='#fff'; ctx.fillRect(-4*s,3*s,3*s,4*s); ctx.fillRect(2*s,3*s,3*s,4*s);
+  // 방망이
+  ctx.save(); ctx.translate(22*s,-2*s); ctx.rotate(0.3+Math.sin(frameCount*0.15)*0.2);
+  ctx.fillStyle='#92400e'; ctx.fillRect(-2*s,0,4*s,18*s);
+  ctx.beginPath(); ctx.ellipse(0,-4*s,7*s,9*s,0,0,Math.PI*2); ctx.fillStyle='#a3a3a3'; ctx.fill(); ctx.strokeStyle='#525252'; ctx.lineWidth=1.5; ctx.stroke();
+  ctx.fillStyle='#fbbf24'; ctx.font=`${8*s}px sans-serif`; ctx.textAlign='center'; ctx.fillText('★',0,-2*s);
+  ctx.restore();
+  ctx.restore();
+}
+
+// ═══ 기둥 ═══
+function drawPipe(x, topH, bottomY) {
+  const pw=PIPE_W*scale, capH=14*scale;
+  const grad=ctx.createLinearGradient(x,0,x+pw,0);
+  grad.addColorStop(0,'#166534'); grad.addColorStop(0.4,'#22c55e'); grad.addColorStop(0.6,'#22c55e'); grad.addColorStop(1,'#166534');
+  ctx.fillStyle=grad; ctx.fillRect(x,0,pw,topH);
+  ctx.fillStyle='#15803d'; ctx.fillRect(x-4*scale,topH-capH,pw+8*scale,capH);
+  ctx.strokeStyle='#14532d'; ctx.lineWidth=2; ctx.strokeRect(x-4*scale,topH-capH,pw+8*scale,capH);
+  ctx.fillStyle=grad; ctx.fillRect(x,bottomY,pw,H-bottomY);
+  ctx.fillStyle='#15803d'; ctx.fillRect(x-4*scale,bottomY,pw+8*scale,capH);
+  ctx.strokeStyle='#14532d'; ctx.strokeRect(x-4*scale,bottomY,pw+8*scale,capH);
+}
+
+// ═══ 배경 ═══
+function drawBg() {
+  if (currentMode === 'pushup') {
+    // 카메라 모드: 반투명 오버레이
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    ctx.fillRect(0, 0, W, H);
+  } else {
+    const skyGrad=ctx.createLinearGradient(0,0,0,H);
+    skyGrad.addColorStop(0,'#0f172a'); skyGrad.addColorStop(0.5,'#1e293b'); skyGrad.addColorStop(1,'#334155');
+    ctx.fillStyle=skyGrad; ctx.fillRect(0,0,W,H);
+    // 별
+    for(let i=0;i<30;i++){const sx=(i*137.5+bgOffset*0.1)%W,sy=(i*97.3)%(H*0.6),ss=i%3===0?2:1;ctx.fillStyle=`rgba(255,255,255,${0.3+(i%5)*0.1})`;ctx.fillRect(sx,sy,ss,ss);}
+    // 산
+    ctx.fillStyle='#1e293b'; ctx.beginPath(); ctx.moveTo(0,H);
+    for(let x=0;x<=W;x+=40){const mh=Math.sin((x+bgOffset*0.3)*0.008)*60+Math.sin((x+bgOffset*0.3)*0.015)*30;ctx.lineTo(x,H-80-mh);}
+    ctx.lineTo(W,H); ctx.fill();
+  }
+  // 바닥
+  ctx.fillStyle=currentMode==='pushup'?'rgba(0,0,0,0.5)':'#0f172a';
+  ctx.fillRect(0,H-40,W,40);
+  ctx.strokeStyle='#334155'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(0,H-40); ctx.lineTo(W,H-40); ctx.stroke();
+}
+
+// ═══ MediaPipe Pose ═══
+let poseInstance = null, camInstance = null;
+
+async function initPose() {
+  const video = document.getElementById('camBg');
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480, facingMode: 'user' } });
+    video.srcObject = stream;
+    video.style.display = 'block';
+
+    poseInstance = new Pose({
+      locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5.1675469404/${f}`
+    });
+    poseInstance.setOptions({ modelComplexity: 0, smoothLandmarks: true, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
+    poseInstance.onResults(onPoseResults);
+
+    camInstance = new Camera(video, {
+      onFrame: async () => { if (poseInstance) await poseInstance.send({ image: video }); },
+      width: 640, height: 480
+    });
+    camInstance.start();
+    poseReady = true;
+    setStatus('카메라 준비 완료! 푸시업 자세를 잡으세요');
+  } catch(e) {
+    console.error('카메라 오류:', e);
+    setStatus('카메라 실패 → 터치 모드로 전환');
+    currentMode = 'touch';
+    video.style.display = 'none';
+  }
+}
+
+function onPoseResults(results) {
+  if (!results.poseLandmarks || !playing) return;
+  const lm = results.poseLandmarks;
+
+  const lShoulder = lm[11];
+  const rShoulder = lm[12];
+  if (!lShoulder || !rShoulder) return;
+
+  prevShoulderY = shoulderY;
+  shoulderY = (lShoulder.y + rShoulder.y) / 2;
+
+  // 첫 몇 프레임에서 기준 범위 설정
+  if (frameCount < 60) {
+    if (shoulderY < poseMinY) poseMinY = shoulderY;
+    if (shoulderY > poseMaxY) poseMaxY = shoulderY;
+    setStatus('몸을 위아래로 움직여서 범위를 잡아주세요!');
+    return;
+  }
+
+  // 어깨 Y(0=위,1=아래)를 화면 Y(위=위,아래=아래)에 매핑
+  const range = Math.max(poseMaxY - poseMinY, 0.08);
+  const norm = (shoulderY - poseMinY) / range; // 0=최상단, 1=최하단
+  const margin = 60;
+  const targetY = margin + norm * (H - 80 - margin * 2);
+
+  // 부드럽게 따라가기
+  gob.y += (targetY - gob.y) * 0.3;
+
+  // 포즈 게이지
+  const fillPct = Math.max(0, Math.min(100, norm * 100));
+  document.getElementById('poseFill').style.height = fillPct + '%';
+
+  // 기준 범위 서서히 확장 (적응)
+  if (shoulderY < poseMinY) poseMinY = poseMinY * 0.95 + shoulderY * 0.05;
+  if (shoulderY > poseMaxY) poseMaxY = poseMaxY * 0.95 + shoulderY * 0.05;
+}
+
+function stopPose() {
+  const video = document.getElementById('camBg');
+  if (video.srcObject) {
+    video.srcObject.getTracks().forEach(t => t.stop());
+    video.srcObject = null;
+  }
+  video.style.display = 'none';
+  poseReady = false;
+}
+
+// ═══ 상태 메시지 ═══
+let statusTimer = null;
+function setStatus(msg) {
+  const el = document.getElementById('statusMsg');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+  if (statusTimer) clearTimeout(statusTimer);
+  statusTimer = setTimeout(() => el.classList.add('hidden'), 2000);
+}
+
+// ═══ 게임 ═══
+function spawnPipe() {
+  const minTop=80, maxTop=H-GAP*scale-120;
+  const topH=minTop+Math.random()*(maxTop-minTop);
+  pipes.push({x:W, topH, bottomY:topH+GAP*scale, scored:false});
+}
+
+function startGame(mode) {
+  currentMode = mode;
+  document.getElementById('menuScreen').classList.add('hidden');
+  document.getElementById('goScreen').classList.add('hidden');
+  document.getElementById('botBar').classList.remove('hidden');
+
+  if (mode === 'pushup') {
+    document.getElementById('poseBar').classList.remove('hidden');
+    document.getElementById('poseLabel').classList.remove('hidden');
+    if (!poseReady) initPose();
+    setStatus('몸을 위아래로 움직여 범위를 잡아주세요!');
+  } else {
+    document.getElementById('poseBar').classList.add('hidden');
+    document.getElementById('poseLabel').classList.add('hidden');
+    stopPose();
+  }
+
+  gob.y = H / 2; gob.vy = 0; gob.rot = 0;
+  score = 0; pushupCount = 0; pipes = []; frameCount = 0;
+  poseMinY = 1; poseMaxY = 0; prevGobY = H / 2;
+  playing = true;
+  spawnPipe();
+  loop();
+}
+
+function jump() {
+  if (!playing) return;
+  gob.vy = JUMP * scale * 0.15;
+  sfxJump();
+}
+
+function gameOver() {
+  playing = false;
+  sfxDie();
+  if (score > best) { best = score; localStorage.setItem('flappy_best', best); }
+  document.getElementById('goScore').textContent = score;
+  document.getElementById('goPushup').textContent = currentMode === 'pushup' ? `🏋️ 푸시업 ${pushupCount}회!` : '';
+  document.getElementById('goBest').textContent = `최고기록: ${best}`;
+  document.getElementById('goScreen').classList.remove('hidden');
+  document.getElementById('botBar').classList.add('hidden');
+  document.getElementById('poseBar').classList.add('hidden');
+  document.getElementById('poseLabel').classList.add('hidden');
+}
+
+function goHome() {
+  playing = false;
+  stopPose();
+  document.getElementById('goScreen').classList.add('hidden');
+  document.getElementById('botBar').classList.add('hidden');
+  document.getElementById('poseBar').classList.add('hidden');
+  document.getElementById('poseLabel').classList.add('hidden');
+  document.getElementById('menuScreen').classList.remove('hidden');
+}
+
+function update() {
+  frameCount++; bgOffset += PIPE_SPEED * scale * 0.5;
+
+  if (currentMode === 'touch') {
+    // 터치 모드: 기존 중력 + 점프
+    gob.vy += GRAVITY * scale * 0.04;
+    gob.y += gob.vy;
+    gob.rot = Math.max(-0.5, Math.min(gob.vy * 0.04, 1.2));
+  } else {
+    // 푸시업 모드: 포즈로 직접 제어 (중력 없음)
+    // gob.y는 onPoseResults에서 업데이트됨
+    const dy = gob.y - (prevGobY || gob.y);
+    gob.rot = Math.max(-0.3, Math.min(dy * 0.02, 0.3));
+    prevGobY = gob.y;
+  }
+
+  if (gob.y > H-40-gob.r*scale || gob.y < gob.r*scale) { gameOver(); return; }
+
+  const pw=PIPE_W*scale;
+  for (let i=pipes.length-1; i>=0; i--) {
+    const p=pipes[i]; p.x -= PIPE_SPEED*scale*0.7;
+    if (!p.scored && p.x+pw < gob.x) { p.scored=true; score++; sfxScore(); }
+    const gr=gob.r*scale;
+    if (gob.x+gr>p.x && gob.x-gr<p.x+pw) {
+      if (gob.y-gr<p.topH || gob.y+gr>p.bottomY) { gameOver(); return; }
+    }
+    if (p.x+pw<-10) pipes.splice(i,1);
+  }
+  const lastPipe=pipes[pipes.length-1];
+  if (!lastPipe || lastPipe.x < W-220*scale) spawnPipe();
+}
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  drawBg();
+  pipes.forEach(p => drawPipe(p.x, p.topH, p.bottomY));
+  drawGoblin(gob.x, gob.y, gob.rot);
+
+  // 점수
+  ctx.font=`900 ${48*scale}px Outfit`; ctx.fillStyle='#fff'; ctx.textAlign='center';
+  ctx.shadowColor='#000'; ctx.shadowBlur=10; ctx.fillText(score, W/2, 70*scale); ctx.shadowBlur=0;
+
+  // 푸시업 카운터
+  if (currentMode === 'pushup' && pushupCount > 0) {
+    ctx.font=`700 ${18*scale}px 'Noto Sans KR'`; ctx.fillStyle='#22c55e';
+    ctx.fillText(`🏋️ ${pushupCount}회`, W/2, 100*scale);
+  }
+
+  // 모드 표시
+  ctx.font=`700 ${12*scale}px 'Noto Sans KR'`; ctx.fillStyle='#ffffff66';
+  ctx.fillText(currentMode==='pushup'?'🏋️ 푸시업 모드':'👆 터치 모드', W/2, H-15);
+}
+
+function loop() { if (!playing) return; update(); draw(); requestAnimationFrame(loop); }
+
+// 터치/키보드 입력 (터치 모드용, 푸시업 모드에서도 폴백)
+canvas.addEventListener('pointerdown', e => { e.preventDefault(); if (currentMode==='touch') jump(); });
+document.addEventListener('keydown', e => { if (e.code==='Space'||e.key==='ArrowUp'){e.preventDefault();jump();} });
+
+// 탭 비활성 시 카메라 끄기
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && currentMode === 'pushup') {
+    const v = document.getElementById('camBg');
+    if (v.srcObject) { v.srcObject.getTracks().forEach(t=>t.stop()); v.srcObject=null; }
+  } else if (!document.hidden && currentMode === 'pushup' && playing) {
+    if (!document.getElementById('camBg').srcObject) initPose();
+  }
+});
+
+// 초기 배경
+drawBg();
+
+// ═══ 공유 ═══
+function toggleShare() { document.getElementById('shareModal').classList.toggle('show'); }
+function getShareUrl() { return window.location.href; }
+function getShareText() {
+  const extra = currentMode==='pushup' ? ` (푸시업 ${pushupCount}회!)` : '';
+  return `👹 플래피 깨비에서 ${score}점${extra} 도전해봐! - KKAEBI`;
+}
+function shareKakao() {
+  if (window.Kakao && Kakao.isInitialized()) {
+    Kakao.Share.sendDefault({
+      objectType:'feed', content:{title:'👹 플래피 깨비 - KKAEBI', description:getShareText(),
+      imageUrl:'https://kkaebi-iota.vercel.app/image/깨비AI프로필.jpg',
+      link:{mobileWebUrl:getShareUrl(),webUrl:getShareUrl()}},
+      buttons:[{title:'도전하기',link:{mobileWebUrl:getShareUrl(),webUrl:getShareUrl()}}]
+    });
+  } else { shareCopy(); alert('카카오톡에 붙여넣기 해주세요!'); }
+}
+function shareTwitter() { window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(getShareText())}&url=${encodeURIComponent(getShareUrl())}`, '_blank'); }
+function shareCopy() { navigator.clipboard.writeText(getShareUrl()).then(()=>{document.getElementById('shareCopied').style.display='block';setTimeout(()=>document.getElementById('shareCopied').style.display='none',2000);}); }
+</script>
+</body>
+</html>
