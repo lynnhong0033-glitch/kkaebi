@@ -760,6 +760,8 @@ let diff = null, scores = { me: 0, cpu: 0 }, turns = 0;
 let G = { me: { l: 1, r: 1 }, cpu: { l: 1, r: 1 }, phase: 'wait', over: false };
 let splitMode = false;
 let splitAutoTimer = null;
+let splitApproaching = false;
+let splitApproachTimer = null;
 
 function applyHit(v) { return v >= 5 ? 0 : v; }
 
@@ -773,11 +775,10 @@ const cvs = document.getElementById('overlay');
 const ctx = cvs.getContext('2d');
 
 // 손 위치 추적
-let leftHandY = 1, rightHandY = 1; // 0=상단, 1=하단
+let leftHandY = 1, rightHandY = 1;
 let leftHandX = 0.25, rightHandX = 0.75;
 let prevLeftInZone = false, prevRightInZone = false;
-const ATTACK_ZONE = 0.38; // 화면 상위 38%
-let leftHandClose = false, rightHandClose = false; // 양손이 가까이 있는지
+const ATTACK_ZONE = 0.38;
 
 function cntF(lm, h) {
   let c = 0;
@@ -869,13 +870,12 @@ function onHR(res) {
   leftHandY = lTipY; rightHandY = rTipY;
   leftHandX = lX; rightHandX = rX;
 
-  // 양손 거리 체크 (쪼개기용)
+  // 양손 거리 체크 (쪼개기용) — 손목 기준 + 중지 기준 복합
+  let handsClose = false;
+  let handsDist = 1;
   if (foundLeft && foundRight) {
-    const dist = Math.abs(lX - rX);
-    leftHandClose = dist < 0.15;
-    rightHandClose = dist < 0.15;
-  } else {
-    leftHandClose = false; rightHandClose = false;
+    handsDist = Math.abs(lX - rX);
+    handsClose = handsDist < 0.25; // 25%이내면 가까움 (넉넉하게)
   }
 
   // 쪼개기 모드: 실시간 손가락 수 표시 → 합 맞으면 자동 실행
@@ -922,11 +922,30 @@ function onHR(res) {
     prevLeftInZone = lInZone;
     prevRightInZone = rInZone;
 
-    // 양손 가까이 모으기 = 쪼개기 시도
-    if (leftHandClose && rightHandClose && canSplit() && foundLeft && foundRight) {
-      gestReady = false;
-      startSplit();
-      setTimeout(() => { gestReady = true; }, COOL);
+    // 양손 가까이 모으기 = 쪼개기
+    if (canSplit() && foundLeft && foundRight) {
+      if (handsClose && !splitApproaching) {
+        // 양손이 가까워지기 시작
+        splitApproaching = true;
+        splitApproachTimer = setTimeout(() => {
+          // 0.5초간 가까이 유지하면 쪼개기 진입
+          if (splitApproaching && canSplit()) {
+            gestReady = false;
+            sfxSplit();
+            startSplit();
+            setTimeout(() => { gestReady = true; }, COOL);
+          }
+          splitApproaching = false;
+        }, 500);
+        setSt('👏 양손을 모으는 중...');
+      } else if (!handsClose && splitApproaching) {
+        // 양손이 다시 벌어짐
+        splitApproaching = false;
+        if (splitApproachTimer) { clearTimeout(splitApproachTimer); splitApproachTimer = null; }
+      }
+    } else {
+      splitApproaching = false;
+      if (splitApproachTimer) { clearTimeout(splitApproachTimer); splitApproachTimer = null; }
     }
 
     // 타겟 영역 표시
@@ -1207,7 +1226,9 @@ function confirmSplit() {
 
 function cancelSplit() {
   splitMode = false;
+  splitApproaching = false;
   if (splitAutoTimer) { clearTimeout(splitAutoTimer); splitAutoTimer = null; }
+  if (splitApproachTimer) { clearTimeout(splitApproachTimer); splitApproachTimer = null; }
   document.getElementById('splitGuide').classList.remove('show');
   setSt(gameMode==='touch'?'내 손을 터치해서 공격하세요 👆':'손을 올려서 공격하세요 👆');
 }
