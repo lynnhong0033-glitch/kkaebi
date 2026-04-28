@@ -454,6 +454,7 @@
     <div class="sc-box"><span style="color:var(--me)" id="sMe">0</span><span style="color:var(--muted)"> : </span><span style="color:var(--cpu)" id="sCpu">0</span></div>
     <div style="display:flex;gap:0.3rem;flex-wrap:wrap;">
       <button class="b-btn" onclick="toggleHelp()">게임규칙</button>
+      <button class="b-btn" onclick="cycleDiff()">🎯 <span id="diffBtn">하수</span></button>
       <button class="b-btn" onclick="resetRound()">🔄 재시작</button>
       <button class="b-btn" onclick="location.href='../index.html'">🏠 홈</button>
       <button class="b-btn b-btn-share" onclick="toggleShare()">📤 공유</button>
@@ -504,9 +505,8 @@
       <div class="sg-h"><div class="sg-h-n" id="sgL" style="color:var(--me)">0</div><div class="sg-h-l">왼손</div></div>
       <div class="sg-h"><div class="sg-h-n" id="sgR" style="color:var(--gold)">0</div><div class="sg-h-l">오른손</div></div>
     </div>
-    <div id="sgValid" style="font-size:0.75rem;color:var(--dim);margin-bottom:0.3rem;"></div>
-    <button class="sg-ok" id="sgOk" onclick="confirmSplit()">이대로 쪼개기!</button>
-    <button class="sg-cancel" onclick="cancelSplit()">취소</button>
+    <div id="sgValid" style="font-size:0.85rem;color:var(--dim);margin-bottom:0.3rem;"></div>
+    <div style="font-size:0.7rem;color:var(--muted);margin-top:0.3rem;">합이 맞으면 1.5초 후 자동 실행!</div>
   </div>
 </div>
 
@@ -740,6 +740,7 @@ function drawCpuSvg(svg, count, dead) {
 let diff = null, scores = { me: 0, cpu: 0 }, turns = 0;
 let G = { me: { l: 1, r: 1 }, cpu: { l: 1, r: 1 }, phase: 'wait', over: false };
 let splitMode = false;
+let splitAutoTimer = null;
 
 function applyHit(v) { return v >= 5 ? 0 : v; }
 
@@ -858,15 +859,27 @@ function onHR(res) {
     leftHandClose = false; rightHandClose = false;
   }
 
-  // 쪼개기 모드: 실시간 손가락 수 표시
+  // 쪼개기 모드: 실시간 손가락 수 표시 → 합 맞으면 자동 실행
   if (splitMode) {
     document.getElementById('sgL').textContent = nL;
     document.getElementById('sgR').textContent = nR;
     const total = G.me.l + G.me.r;
     const valid = (nL + nR === total) && !(nL === G.me.l && nR === G.me.r) && nL <= 4 && nR <= 4;
-    document.getElementById('sgValid').textContent = valid ? '✅ 합계가 맞습니다!' : `합계 ${nL + nR} / 필요 ${total}`;
-    document.getElementById('sgOk').disabled = !valid;
-    document.getElementById('sgOk').style.opacity = valid ? 1 : 0.3;
+    document.getElementById('sgValid').textContent = valid ? '✅ 합계 맞음! 유지하세요...' : `합계 ${nL + nR} / 필요 ${total}`;
+
+    if (valid && !splitAutoTimer) {
+      splitAutoTimer = setTimeout(() => {
+        if (splitMode) {
+          // 다시 한번 체크
+          const stillValid = (curL + curR === total) && !(curL === G.me.l && curR === G.me.r);
+          if (stillValid) confirmSplit();
+        }
+        splitAutoTimer = null;
+      }, 1500);
+    } else if (!valid && splitAutoTimer) {
+      clearTimeout(splitAutoTimer);
+      splitAutoTimer = null;
+    }
     return;
   }
 
@@ -1087,29 +1100,24 @@ function startSplit() {
 function openSplit() {
   if (!canSplit()) return;
   const total = G.me.l + G.me.r;
-  // splitGuide를 슬라이더 모드로 전환
   splitMode = true;
+  splitAutoTimer = null;
   const sg = document.getElementById('splitGuide');
   sg.classList.add('show');
   document.getElementById('sgTotal').textContent = total;
 
-  // 터치 모드면 슬라이더 보여주기
   if (gameMode === 'touch') {
-    // sgL, sgR을 버튼으로 조작 가능하게
     document.getElementById('sgL').textContent = G.me.l;
     document.getElementById('sgR').textContent = G.me.r;
-    document.getElementById('sgValid').textContent = '';
-    document.getElementById('sgOk').disabled = true;
-    document.getElementById('sgOk').style.opacity = '0.3';
+    document.getElementById('sgValid').textContent = '◀ ▶ 버튼으로 분배를 조절하세요';
 
-    // ← → 버튼 추가 (없으면)
     if (!document.getElementById('sgLeftBtn')) {
       const controls = document.createElement('div');
       controls.id = 'sgControls';
       controls.style.cssText = 'display:flex;gap:0.8rem;margin-top:0.8rem;';
       controls.innerHTML = `
-        <button id="sgLeftBtn" style="font-size:1.5rem;padding:0.4rem 1rem;border:none;border-radius:8px;background:#ff6b3530;color:var(--me);cursor:pointer;" onclick="splitAdjust(-1)">◀ 왼손+</button>
-        <button id="sgRightBtn" style="font-size:1.5rem;padding:0.4rem 1rem;border:none;border-radius:8px;background:#fbbf2430;color:var(--gold);cursor:pointer;" onclick="splitAdjust(1)">오른손+ ▶</button>
+        <button id="sgLeftBtn" style="font-size:1.5rem;padding:0.6rem 1.2rem;border:none;border-radius:10px;background:#3b82f620;color:#3b82f6;cursor:pointer;" onclick="splitAdjust(-1)">◀ 왼손+</button>
+        <button id="sgRightBtn" style="font-size:1.5rem;padding:0.6rem 1.2rem;border:none;border-radius:10px;background:#fbbf2420;color:#fbbf24;cursor:pointer;" onclick="splitAdjust(1)">오른손+ ▶</button>
       `;
       sg.querySelector('.sg-hands').after(controls);
     }
@@ -1140,9 +1148,17 @@ function splitAdjust(dir) {
     !(splitTouchL === G.me.l && splitTouchR === G.me.r) &&
     splitTouchL <= 4 && splitTouchR <= 4 &&
     splitTouchL >= 0 && splitTouchR >= 0;
-  document.getElementById('sgValid').textContent = valid ? '✅ OK!' : '현재와 다르게 나눠주세요';
-  document.getElementById('sgOk').disabled = !valid;
-  document.getElementById('sgOk').style.opacity = valid ? '1' : '0.3';
+  document.getElementById('sgValid').textContent = valid ? '✅ 1초 후 자동 실행!' : '현재와 다르게 나눠주세요';
+
+  if (valid) {
+    if (splitAutoTimer) clearTimeout(splitAutoTimer);
+    splitAutoTimer = setTimeout(() => {
+      if (splitMode) confirmSplit();
+      splitAutoTimer = null;
+    }, 1000);
+  } else {
+    if (splitAutoTimer) { clearTimeout(splitAutoTimer); splitAutoTimer = null; }
+  }
 }
 
 function confirmSplit() {
@@ -1171,6 +1187,7 @@ function confirmSplit() {
 
 function cancelSplit() {
   splitMode = false;
+  if (splitAutoTimer) { clearTimeout(splitAutoTimer); splitAutoTimer = null; }
   document.getElementById('splitGuide').classList.remove('show');
   setSt(gameMode==='touch'?'내 손을 터치해서 공격하세요 👆':'손을 올려서 공격하세요 👆');
 }
@@ -1318,6 +1335,17 @@ document.addEventListener('keydown', e => {
 function skipTut() { document.getElementById('tutorial').classList.add('hidden'); document.getElementById('diffScreen').classList.add('show'); }
 function toggleHelp() { document.getElementById('helpPanel').classList.toggle('show'); }
 
+function cycleDiff() {
+  const order = ['easy', 'medium', 'hard'];
+  const names = { easy: '😴 하수', medium: '🤔 중수', hard: '😈 고수' };
+  const idx = order.indexOf(diff);
+  diff = order[(idx + 1) % 3];
+  document.getElementById('diffBtn').textContent = names[diff];
+  document.getElementById('gDf').textContent = names[diff];
+  resetRound();
+  setSt(`난이도: ${names[diff]}로 변경!`);
+}
+
 function toggleShare() { document.getElementById('shareModal').classList.toggle('show'); document.getElementById('shareCopied').style.display = 'none'; }
 
 function getShareUrl() { return window.location.href; }
@@ -1387,7 +1415,9 @@ function checkReady() {
 
 function launch() {
   document.getElementById('diffScreen').classList.remove('show');
-  document.getElementById('gDf').textContent = { easy: '😴 하수', medium: '🤔 중수', hard: '😈 고수' }[diff];
+  const names = { easy: '😴 하수', medium: '🤔 중수', hard: '😈 고수' };
+  document.getElementById('gDf').textContent = names[diff];
+  document.getElementById('diffBtn').textContent = names[diff];
 
   if (gameMode === 'cam') {
     initCam();
