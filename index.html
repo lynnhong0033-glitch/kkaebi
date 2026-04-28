@@ -529,6 +529,15 @@
     justify-content: center;
     font-size: 4rem;
     flex-shrink: 0;
+    overflow: hidden;
+    border: 3px solid var(--accent);
+    box-shadow: 0 0 30px #ff6b3522;
+  }
+
+  .about-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
   .about-text h3 {
@@ -843,7 +852,7 @@
 <section id="about">
   <div class="reveal">
     <div class="about-layout">
-      <div class="about-avatar">🧊</div>
+      <div class="about-avatar"><img src="image/profile.jpg" alt="KKAEBI" onerror="this.style.display='none';this.parentElement.textContent='🧊';"></div>
       <div class="about-text">
         <h3>KKAEBI</h3>
         <div class="tagline">AI Content Creator & Educator</div>
@@ -853,9 +862,9 @@
           누구나 AI로 크리에이터가 될 수 있다고 믿습니다.
         </p>
         <div class="social-links">
+          <a href="https://www.instagram.com/kkaebi.ai" class="social-link" target="_blank">📸 Instagram</a>
           <a href="#" class="social-link" target="_blank">📺 YouTube</a>
-          <a href="#" class="social-link" target="_blank">📸 Instagram</a>
-          <a href="#" class="social-link" target="_blank">✉️ 문의하기</a>
+          <a href="https://www.instagram.com/kkaebi.ai" class="social-link" target="_blank">✉️ 문의하기</a>
         </div>
       </div>
     </div>
