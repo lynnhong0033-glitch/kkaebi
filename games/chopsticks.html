@@ -561,8 +561,13 @@
 <video id="htV" style="display:none" autoplay playsinline></video>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3.1675466862/camera_utils.min.js"></script>
+<script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.4/kakao.min.js" crossorigin="anonymous"></script>
 
 <script>
+// 카카오 SDK 초기화
+if (window.Kakao && !Kakao.isInitialized()) {
+  Kakao.init('f1f90f1eb42f4d8836c6d95cce909551');
+}
 // ═══ 사운드 시스템 (Web Audio API - 저작권 무관) ═══
 let audioCtx = null;
 function getAudio() {
@@ -1452,8 +1457,33 @@ function getShareText() {
 }
 
 function shareKakao() {
-  const url = `https://sharer.kakao.com/talk/friends/picker/link?url=${encodeURIComponent(getShareUrl())}&text=${encodeURIComponent(getShareText())}`;
-  window.open(url, '_blank');
+  if (window.Kakao && Kakao.isInitialized()) {
+    Kakao.Share.sendDefault({
+      objectType: 'feed',
+      content: {
+        title: '🥢 젓가락 게임 - KKAEBI',
+        description: getShareText(),
+        imageUrl: 'https://kkaebi.vercel.app/image/깨비AI프로필.jpg',
+        link: {
+          mobileWebUrl: getShareUrl(),
+          webUrl: getShareUrl(),
+        },
+      },
+      buttons: [
+        {
+          title: '게임 하러 가기',
+          link: {
+            mobileWebUrl: getShareUrl(),
+            webUrl: getShareUrl(),
+          },
+        },
+      ],
+    });
+  } else {
+    // SDK 실패 시 폴백: 링크 복사
+    shareCopy();
+    alert('카카오톡에 링크를 붙여넣기 해주세요!');
+  }
 }
 function shareTwitter() {
   const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(getShareText())}&url=${encodeURIComponent(getShareUrl())}`;
