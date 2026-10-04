@@ -122,26 +122,18 @@
     .post-input-area{flex-wrap:wrap;}
     .post-input{min-width:0;}
   }
-</style>
+.site-nav{position:sticky!important;top:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:14px max(20px,calc((100% - 1000px)/2));background:#fffffff5;border-bottom:1px solid #e2e8f0;backdrop-filter:blur(14px);font:600 14px/1.5 -apple-system,BlinkMacSystemFont,sans-serif;box-sizing:border-box}.site-nav a{color:#475569;text-decoration:none;white-space:nowrap}.site-nav .site-brand{font-size:21px;font-weight:900;color:#2563eb}.site-nav>div{display:flex;gap:24px}.site-nav a:hover,.site-nav a[aria-current=page]{color:#2563eb}.site-nav a:focus-visible{outline:2px solid #2563eb;outline-offset:4px}@media(max-width:520px){.site-nav{padding:12px 16px;gap:10px}.site-nav>div{gap:14px}.site-nav .site-brand{font-size:18px}.site-nav a{font-size:13px}}@media print{.site-nav{display:none!important}}</style>
 </head>
 <body>
 
-<nav>
-  <a href="#" class="nav-logo">KKAEBI</a>
-  <ul class="nav-links" id="navLinks">
-    <li><a href="#games">뚝딱 프로그램</a></li>
-    <li><a href="#resources">자료실</a></li>
-    <li><a href="/notes.html">깨비 노트</a></li><li><a href="#about">소개</a></li>
-  </ul>
-  <button aria-label="메뉴 열기" class="nav-mobile" onclick="document.getElementById('navLinks').classList.toggle('open')">☰</button>
-</nav>
+<nav class="site-nav" aria-label="주 메뉴"><a class="site-brand" href="/">깨비AI</a><div><a href="/">홈</a><a href="/resources.html">자료실</a><a href="/notes.html">깨비 노트</a><a href="/#games">프로그램</a></div></nav>
 
 <section class="hero">
   <div class="hero-badge"><span class="dot"></span>깨비AI의 실전 가이드와 무료 자료</div>
   <h1>오늘 당장 써먹을 <span class="hl">AI</span></h1>
   <p class="hero-sub">AI로 뚝딱, 깨비가 알려줌!<br>인스타에서 본 AI, 여기서 직접 써보세요.</p>
   <div class="hero-cta">
-    <a href="#resources" class="btn btn-primary">무료 자료 받기 ↓</a>
+    <a href="/resources.html" class="btn btn-primary">무료 자료 받기 ↓</a>
     <a href="#games" class="btn btn-ghost">프로그램 구경하기 →</a>
   </div>
 </section>
@@ -169,11 +161,8 @@
 <div class="divider"><hr></div>
 
 <section id="resources">
-  <div class="reveal"><div class="section-label">RESOURCES</div><h2 class="section-title">자료실</h2><p class="section-desc">바로 써먹을 수 있는 AI 프롬프트와 템플릿.</p></div>
+  <div class="reveal"><div class="section-label">RESOURCES</div><h2 class="section-title">자료실</h2><p class="section-desc">바로 써볼 가이드와 프롬프트를 한곳에. <a href="/resources.html">자료 전체 보기 →</a></p></div>
   <div class="resource-grid"><a href="/korean-ai.html" class="resource-card reveal" style="text-decoration:none;color:inherit"><div class="resource-icon">🇰🇷</div><h4>한국인 필수 AI 시작 가이드</h4><p>가격 비교부터 KTX 시간표까지. 설치 안내와 바로 써볼 질문 3개를 담았어요.</p><span class="resource-price price-free">무료 PDF · 바로 읽기</span></a>
-    <a href="https://www.notion.so/350b5d606ac381b599aedf6a02f09e5e" target="_blank" rel="noopener noreferrer" class="resource-card reveal" style="text-decoration:none;color:inherit;cursor:pointer;"><div class="resource-icon">🔍</div><h4>AI 팩트체크 프롬프트</h4><p>뉴스 검증, 내 글 검토, 논문 리뷰까지. 복붙 한 번이면 끝!</p><span class="resource-price price-free">무료</span></a>
-    <div class="resource-card reveal" style="opacity:0.5;pointer-events:none;"><div class="resource-icon">🎬</div><h4>영상 편집 템플릿</h4><p>AI로 영상 만드는 편집 구조 템플릿</p><span class="resource-price" style="background:#94a3b815;color:#94a3b8;">준비 중</span></div>
-    <div class="resource-card reveal" style="opacity:0.5;pointer-events:none;"><div class="resource-icon">🤖</div><h4>AI 자동화 가이드</h4><p>반복 작업을 AI로 자동화하는 방법</p><span class="resource-price" style="background:#94a3b815;color:#94a3b8;">준비 중</span></div>
   </div>
 </section>
 
@@ -196,7 +185,7 @@
   </div>
 </section>
 
-<footer><a href="/write.html" style="color:var(--text-dim)">운영자 글쓰기 ↗</a><p>© 2026 KKAEBI. AI 소식 뚝딱, 깨비AI.</p></footer>
+<footer><p>© 2026 KKAEBI. AI 소식 뚝딱, 깨비AI.</p></footer>
 
 <script>
 document.querySelectorAll('.nav-links a').forEach(l=>l.addEventListener('click',()=>document.getElementById('navLinks').classList.remove('open')));
