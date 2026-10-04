@@ -22,7 +22,7 @@
     --shadow-lg:0 4px 24px #0000001a;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
-  html{scroll-behavior:smooth;}
+  html{scroll-behavior:smooth;scroll-padding-top:90px;}
   body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR','Outfit',sans-serif;line-height:1.7;overflow-x:hidden;}
 
   nav{position:fixed;top:0;width:100%;z-index:1000;padding:0.8rem 2rem;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(16px);background:#ffffffdd;border-bottom:1px solid var(--border);}
@@ -131,18 +131,18 @@
   <ul class="nav-links" id="navLinks">
     <li><a href="#games">뚝딱 프로그램</a></li>
     <li><a href="#resources">자료실</a></li>
-    <li><a href="#about">소개</a></li>
+    <li><a href="/notes.html">깨비 노트</a></li><li><a href="#about">소개</a></li>
   </ul>
-  <button class="nav-mobile" onclick="document.getElementById('navLinks').classList.toggle('open')">☰</button>
+  <button aria-label="메뉴 열기" class="nav-mobile" onclick="document.getElementById('navLinks').classList.toggle('open')">☰</button>
 </nav>
 
 <section class="hero">
-  <div class="hero-badge"><span class="dot"></span>매일 새로운 AI 콘텐츠 업데이트 중</div>
+  <div class="hero-badge"><span class="dot"></span>깨비AI의 실전 가이드와 무료 자료</div>
   <h1>오늘 당장 써먹을 <span class="hl">AI</span></h1>
-  <p class="hero-sub">AI로 뚝딱, 깨비가 알려줌!<br>매일 올라오는 실전 AI 활용법과 재미있는 프로그램들.</p>
+  <p class="hero-sub">AI로 뚝딱, 깨비가 알려줌!<br>인스타에서 본 AI, 여기서 직접 써보세요.</p>
   <div class="hero-cta">
-    <a href="#games" class="btn btn-primary">🎮 프로그램 구경하기</a>
-    <a href="#about" class="btn btn-ghost">👋 KKAEBI는 누구?</a>
+    <a href="#resources" class="btn btn-primary">무료 자료 받기 ↓</a>
+    <a href="#games" class="btn btn-ghost">프로그램 구경하기 →</a>
   </div>
 </section>
 
@@ -170,8 +170,8 @@
 
 <section id="resources">
   <div class="reveal"><div class="section-label">RESOURCES</div><h2 class="section-title">자료실</h2><p class="section-desc">바로 써먹을 수 있는 AI 프롬프트와 템플릿.</p></div>
-  <div class="resource-grid">
-    <a href="https://www.notion.so/350b5d606ac381b599aedf6a02f09e5e" target="_blank" class="resource-card reveal" style="text-decoration:none;color:inherit;cursor:pointer;"><div class="resource-icon">🔍</div><h4>AI 팩트체크 프롬프트</h4><p>뉴스 검증, 내 글 검토, 논문 리뷰까지. 복붙 한 번이면 끝!</p><span class="resource-price price-free">무료</span></a>
+  <div class="resource-grid"><a href="/korean-ai.html" class="resource-card reveal" style="text-decoration:none;color:inherit"><div class="resource-icon">🇰🇷</div><h4>한국인 필수 AI 시작 가이드</h4><p>가격 비교부터 KTX 시간표까지. 설치 안내와 바로 써볼 질문 3개를 담았어요.</p><span class="resource-price price-free">무료 PDF · 바로 읽기</span></a>
+    <a href="https://www.notion.so/350b5d606ac381b599aedf6a02f09e5e" target="_blank" rel="noopener noreferrer" class="resource-card reveal" style="text-decoration:none;color:inherit;cursor:pointer;"><div class="resource-icon">🔍</div><h4>AI 팩트체크 프롬프트</h4><p>뉴스 검증, 내 글 검토, 논문 리뷰까지. 복붙 한 번이면 끝!</p><span class="resource-price price-free">무료</span></a>
     <div class="resource-card reveal" style="opacity:0.5;pointer-events:none;"><div class="resource-icon">🎬</div><h4>영상 편집 템플릿</h4><p>AI로 영상 만드는 편집 구조 템플릿</p><span class="resource-price" style="background:#94a3b815;color:#94a3b8;">준비 중</span></div>
     <div class="resource-card reveal" style="opacity:0.5;pointer-events:none;"><div class="resource-icon">🤖</div><h4>AI 자동화 가이드</h4><p>반복 작업을 AI로 자동화하는 방법</p><span class="resource-price" style="background:#94a3b815;color:#94a3b8;">준비 중</span></div>
   </div>
@@ -188,15 +188,15 @@
         <div class="tagline">AI로 뚝딱, 깨비가 알려줌!</div>
         <p>오늘 당장 써먹을 수 있는 AI 활용법을 알려드립니다.<br>어렵지 않아요. AI가 처음이어도 괜찮아요.<br>인스타그램 구독하면 AI 소식, 게임, 꿀팁을 매일 받아볼 수 있어요!</p>
         <div class="social-links">
-          <a href="https://www.instagram.com/kkaebi.ai" class="social-link" target="_blank">📸 Instagram</a>
-          <a href="https://www.instagram.com/kkaebi.ai" class="social-link" target="_blank">✉️ 문의하기</a>
+          <a href="https://www.instagram.com/kkaebi.ai" class="social-link" target="_blank" rel="noopener noreferrer">📸 Instagram</a>
+          <a href="https://www.instagram.com/kkaebi.ai" class="social-link" target="_blank" rel="noopener noreferrer">✉️ 문의하기</a>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<footer><p>© 2025 KKAEBI. 오늘 당장 써먹을 AI, 매일 올라옵니다.</p></footer>
+<footer><a href="/write.html" style="color:var(--text-dim)">운영자 글쓰기 ↗</a><p>© 2026 KKAEBI. AI 소식 뚝딱, 깨비AI.</p></footer>
 
 <script>
 document.querySelectorAll('.nav-links a').forEach(l=>l.addEventListener('click',()=>document.getElementById('navLinks').classList.remove('open')));
